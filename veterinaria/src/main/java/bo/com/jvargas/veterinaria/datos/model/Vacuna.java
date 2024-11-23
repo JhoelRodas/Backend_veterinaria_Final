@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -17,5 +19,8 @@ public class Vacuna {
 
     @Column(name = "nombre", nullable = false, length = 20)
     private String nombre;
+
+    @OneToMany(mappedBy = "idVacuna", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<ControlVacuna> controlVacunas = new HashSet<>();
 
 }

@@ -5,6 +5,8 @@ import lombok.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -50,4 +52,8 @@ public class HistorialClinico
 
     @OneToOne(mappedBy = "idHistorial", fetch = FetchType.LAZY)
     private Mascota mascota;
+
+    @OneToMany(mappedBy = "idHistorial", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<ControlVacuna> controlVacunas = new HashSet<>();
+
 }

@@ -16,8 +16,8 @@ public class ControlVacunaId implements java.io.Serializable {
     @Column(name = "id_vacuna", nullable = false)
     private Long idVacuna;
 
-    @Column(name = "id_atencion", nullable = false)
-    private Integer idAtencion;
+    @Column(name = "id_historial", nullable = false)
+    private Long idHistorial;
 
     @Override
     public boolean equals(Object o) {
@@ -25,12 +25,12 @@ public class ControlVacunaId implements java.io.Serializable {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         ControlVacunaId entity = (ControlVacunaId) o;
         return Objects.equals(this.idVacuna, entity.idVacuna) &&
-                Objects.equals(this.idAtencion, entity.idAtencion);
+                Objects.equals(this.idHistorial, entity.idHistorial);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idVacuna, idAtencion);
+        return Objects.hash(idVacuna, idHistorial);
     }
 
 }
