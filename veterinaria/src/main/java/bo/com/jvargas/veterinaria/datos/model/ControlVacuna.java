@@ -30,6 +30,6 @@ public class ControlVacuna {
     @Column(name = "fecha_colocada", nullable = false)
     private LocalDate fechaColocada;
 
-    @Column(name = "proxima_dosis", nullable = false)
+    @Column(name = "proxima_dosis")
     private LocalDate proximaDosis;
 }
