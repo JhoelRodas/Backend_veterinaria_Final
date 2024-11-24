@@ -1,6 +1,5 @@
 package bo.com.jvargas.veterinaria.negocio.ventas;
 
-import bo.com.jvargas.veterinaria.datos.model.Servicio;
 import bo.com.jvargas.veterinaria.datos.model.dto.ServicioDto;
 
 import java.util.List;

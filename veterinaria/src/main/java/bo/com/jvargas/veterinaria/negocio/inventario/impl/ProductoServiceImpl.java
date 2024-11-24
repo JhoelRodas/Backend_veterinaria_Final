@@ -2,10 +2,12 @@ package bo.com.jvargas.veterinaria.negocio.inventario.impl;
 
 import bo.com.jvargas.veterinaria.datos.model.Categoria;
 import bo.com.jvargas.veterinaria.datos.model.Producto;
+import bo.com.jvargas.veterinaria.datos.model.Vacuna;
 import bo.com.jvargas.veterinaria.datos.model.dto.ProductoDto;
 import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.inventario.CategoriaRepository;
 import bo.com.jvargas.veterinaria.datos.repository.inventario.ProductoRepository;
+import bo.com.jvargas.veterinaria.datos.repository.ventas.VacunaRepository;
 import bo.com.jvargas.veterinaria.negocio.inventario.ProductoService;
 import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class ProductoServiceImpl implements ProductoService {
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
     private final BitacoraService bitacoraService;
+    private final VacunaRepository vacunaRepository;
 
     @Override
     public List<ProductoDto> lista() {
@@ -42,7 +45,17 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setDescripcion(productoDto.getDescripcion());
         Optional<Categoria> categoria = categoriaRepository.findByIdAndDeletedFalse(productoDto.getIdCategoria());
         producto.setIdCategoria(categoria.orElseThrow());
-        productoRepository.save(producto);
+        Producto productoGuardado = productoRepository.save(producto);
+
+        //Verifica si el producto es de categoria vacuna
+        Optional<Categoria> categoriaVacuna = categoriaRepository
+                .findByDeletedFalseAndNombreIgnoreCase("vacuna");
+        Long idCategoriaVacuna = categoriaVacuna.orElseThrow().getId();
+        if (producto.getIdCategoria().getId().equals(idCategoriaVacuna)) {
+            Vacuna vacuna= new Vacuna();
+            vacuna.setId(productoGuardado.getId());
+            vacunaRepository.save(vacuna);
+        }
 
         bitacoraService.info(TipoProceso.GESTIONAR_PRODUCTO,
                 "Producto Registrado correctamente : {}",producto.getNombre());

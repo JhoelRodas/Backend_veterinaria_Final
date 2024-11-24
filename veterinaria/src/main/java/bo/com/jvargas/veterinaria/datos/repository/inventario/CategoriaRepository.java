@@ -14,4 +14,6 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     List<Categoria> findAllByDeletedFalse();
 
     Optional<Categoria> findByIdAndDeletedFalse(Long id);
+
+    Optional<Categoria> findByDeletedFalseAndNombreIgnoreCase(String nombre);
 }

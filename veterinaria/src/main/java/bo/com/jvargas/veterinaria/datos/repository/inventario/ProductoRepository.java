@@ -16,4 +16,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     List<ProductoDto> listar();
 
     Optional<Producto> findByIdAndDeletedFalse(Long id);
+
+    List<Producto> findAllByDeletedFalseAndIdCategoria_NombreIgnoreCase(
+            String nombreCategoria);
 }
