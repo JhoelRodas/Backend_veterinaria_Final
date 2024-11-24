@@ -47,8 +47,9 @@ public class VacunaServiceImpl implements VacunaService {
                 vacunas.remove(0);
                 productos.remove(i);
                 i = 0;
+            } else {
+                i++;
             }
-            i++;
         }
 
         return vacunaDtos;
