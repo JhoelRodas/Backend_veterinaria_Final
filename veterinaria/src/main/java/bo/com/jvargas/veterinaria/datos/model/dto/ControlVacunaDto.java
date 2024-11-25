@@ -2,6 +2,7 @@ package bo.com.jvargas.veterinaria.datos.model.dto;
 
 import bo.com.jvargas.veterinaria.datos.model.ControlVacuna;
 import bo.com.jvargas.veterinaria.datos.model.Vacuna;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -20,7 +21,9 @@ public class ControlVacunaDto {
     private Long idHistorial;
     private String nombre;
     private String descripcion;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate fechaColocada;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate proximaDosis;
 
     public static ControlVacunaDto toDto(ControlVacuna controlVacuna) {

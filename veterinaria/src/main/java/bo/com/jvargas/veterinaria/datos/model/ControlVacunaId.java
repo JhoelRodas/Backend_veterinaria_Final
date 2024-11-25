@@ -1,6 +1,8 @@
 package bo.com.jvargas.veterinaria.datos.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 
@@ -10,6 +12,8 @@ import java.util.Objects;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Embeddable
 public class ControlVacunaId implements java.io.Serializable {
     private static final long serialVersionUID = 2556323115335093901L;

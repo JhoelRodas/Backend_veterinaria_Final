@@ -1,7 +1,9 @@
 package bo.com.jvargas.veterinaria.api.venta;
 
 import bo.com.jvargas.veterinaria.datos.model.HistorialClinico;
+import bo.com.jvargas.veterinaria.datos.model.dto.ControlVacunaDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.HistorialClinicoDto;
+import bo.com.jvargas.veterinaria.negocio.ventas.ControlVacunaService;
 import bo.com.jvargas.veterinaria.negocio.ventas.HistorialClinicoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class HistorialClinicoController {
 
     private final HistorialClinicoService service;
+    private final ControlVacunaService controlVacunaService;
 
     @GetMapping
     public ResponseEntity<?> listar() {
@@ -43,12 +46,38 @@ public class HistorialClinicoController {
         return ResponseEntity.accepted().build();
     }
 
+    @PostMapping("/control")
+    public ResponseEntity<?> guardarControl(
+            @RequestBody ControlVacunaDto nuevoControl) {
+        try {
+            controlVacunaService.insertarVacuna(nuevoControl);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
+    }
+
     @PutMapping
     public ResponseEntity<?> actualizarHistorial(
             @RequestParam("id") Long id,
             @RequestBody HistorialClinico historialNuevo) {
         try {
             service.actualizarHistorial(id, historialNuevo);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/control")
+    public ResponseEntity<?> actualizarControl(
+            @RequestParam("idVacuna") Long idVacuna,
+            @RequestParam("idHitorial") Long idHistorial,
+            @RequestBody ControlVacunaDto nuevoControl) {
+        try {
+            controlVacunaService.actualizarVacuna(idVacuna, idHistorial, nuevoControl);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

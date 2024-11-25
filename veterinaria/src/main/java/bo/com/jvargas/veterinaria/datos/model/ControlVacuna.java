@@ -1,5 +1,6 @@
 package bo.com.jvargas.veterinaria.datos.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,9 +28,11 @@ public class ControlVacuna {
     @Column(name = "descripcion", nullable = false, length = 100)
     private String descripcion;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @Column(name = "fecha_colocada", nullable = false)
     private LocalDate fechaColocada;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @Column(name = "proxima_dosis")
     private LocalDate proximaDosis;
 }
