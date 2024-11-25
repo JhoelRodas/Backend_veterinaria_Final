@@ -1,7 +1,13 @@
 package bo.com.jvargas.veterinaria.negocio.ventas.impl;
 
 import bo.com.jvargas.veterinaria.datos.model.HistorialClinico;
+import bo.com.jvargas.veterinaria.datos.model.Producto;
+import bo.com.jvargas.veterinaria.datos.model.dto.AtencionDto;
+import bo.com.jvargas.veterinaria.datos.model.dto.ControlVacunaDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.HistorialClinicoDto;
+import bo.com.jvargas.veterinaria.datos.repository.inventario.ProductoRepository;
+import bo.com.jvargas.veterinaria.datos.repository.ventas.AtencionRepository;
+import bo.com.jvargas.veterinaria.datos.repository.ventas.ControlVacunaRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.HistorialClinicoRepository;
 import bo.com.jvargas.veterinaria.negocio.ventas.HistorialClinicoService;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -20,6 +27,9 @@ import java.util.stream.Collectors;
 public class HistorialClinicoServiceImpl implements HistorialClinicoService {
 
     private final HistorialClinicoRepository historialClinicoRepository;
+    private final ControlVacunaRepository controlVacunaRepository;
+    private final ProductoRepository productoRepository;
+    private final AtencionRepository atencionRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -32,7 +42,32 @@ public class HistorialClinicoServiceImpl implements HistorialClinicoService {
     @Override
     @Transactional(readOnly = true)
     public HistorialClinicoDto obtenerHistorial(Long id) {
-        return HistorialClinicoDto.toDto(getHistorialClinico(id));
+        List<ControlVacunaDto> vacunas = getVacunas(id);
+        List<AtencionDto> atenciones = atencionRepository.
+                findAllByDeletedFalseAndIdHistorial_IdOrderByFechaAsc(id).stream()
+                .map(AtencionDto::toDto)
+                .toList();
+        return HistorialClinicoDto.toDto2(getHistorialClinico(id), vacunas,
+                atenciones);
+    }
+
+    private List<ControlVacunaDto> getVacunas(Long id) {
+        List<ControlVacunaDto> vacunas = controlVacunaRepository
+                .findAllByIdHistorial_IdOrderByFechaColocadaAsc(id).stream()
+                .map(ControlVacunaDto::toDto)
+                .toList();
+
+        actalizarListaConNombre(vacunas);
+        return vacunas;
+    }
+
+    private void actalizarListaConNombre(List<ControlVacunaDto> vacunas) {
+        for (ControlVacunaDto vacunaDto : vacunas) {
+            Optional<Producto> o = productoRepository
+                    .findByIdAndDeletedFalse(vacunaDto.getIdVacuna());
+            String nombreVacuna = o.orElseThrow().getNombre();
+            vacunaDto.setNombre(nombreVacuna);
+        }
     }
 
     private HistorialClinico getHistorialClinico(Long id) {

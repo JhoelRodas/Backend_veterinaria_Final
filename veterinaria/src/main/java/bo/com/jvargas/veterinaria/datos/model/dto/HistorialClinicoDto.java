@@ -4,6 +4,7 @@ import bo.com.jvargas.veterinaria.datos.model.HistorialClinico;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author GERSON
@@ -31,6 +32,8 @@ public class HistorialClinicoDto {
     private String especie;
     private String raza;
     private String duenio;
+    private List<ControlVacunaDto> vacunas;
+    private List<AtencionDto> atenciones;
 
     public static HistorialClinicoDto toDto(HistorialClinico historial) {
         return HistorialClinicoDto.builder()
@@ -49,6 +52,30 @@ public class HistorialClinicoDto {
                 .especie(historial.getMascota().getEspecie())
                 .raza(historial.getMascota().getRaza())
                 .duenio(historial.getMascota().getCiCliente().getNombre())
+                .build();
+    }
+
+    public static HistorialClinicoDto toDto2(HistorialClinico historial,
+                                            List<ControlVacunaDto> vacunas,
+                                             List<AtencionDto> atenciones) {
+        return HistorialClinicoDto.builder()
+                .id(historial.getId())
+                .peso(historial.getPeso())
+                .fc(historial.getFc())
+                .estadoFc(historial.getEstadoFc())
+                .fr(historial.getFr())
+                .estadoFr(historial.getEstadoFr())
+                .mucosa(historial.getMucosa())
+                .apetito(historial.getApetito())
+                .hidratacion(historial.getHidratacion())
+                .estadoGeneral(historial.getEstadoGeneral())
+                .mascota(historial.getMascota().getNombre())
+                .sexo(historial.getMascota().getSexo())
+                .especie(historial.getMascota().getEspecie())
+                .raza(historial.getMascota().getRaza())
+                .duenio(historial.getMascota().getCiCliente().getNombre())
+                .vacunas(vacunas)
+                .atenciones(atenciones)
                 .build();
     }
 }

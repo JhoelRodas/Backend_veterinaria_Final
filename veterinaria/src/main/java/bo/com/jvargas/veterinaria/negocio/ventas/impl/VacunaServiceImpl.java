@@ -8,10 +8,10 @@ import bo.com.jvargas.veterinaria.datos.repository.ventas.VacunaRepository;
 import bo.com.jvargas.veterinaria.negocio.ventas.VacunaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author GERSON
@@ -25,6 +25,7 @@ public class VacunaServiceImpl implements VacunaService {
     private final ProductoRepository productoRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<VacunaDto> listar() {
         List<Vacuna> vacunas = vacunaRepository.findAllByDeletedFalse();
         List<Producto> productos = productoRepository
@@ -62,6 +63,7 @@ public class VacunaServiceImpl implements VacunaService {
     }
 
     @Override
+    @Transactional
     public void actualizar(Long id, VacunaDto vacunaNueva) {
         Vacuna vacunaBuscada = getVacuna(id);
 

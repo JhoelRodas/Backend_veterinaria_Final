@@ -14,4 +14,7 @@ public interface AtencionRepository extends JpaRepository<Atencion, Long> {
     List<Atencion> findAllByDeletedFalse();
 
     Optional<Atencion> findByIdAndDeletedFalse(Long id);
+
+    List<Atencion> findAllByDeletedFalseAndIdHistorial_IdOrderByFechaAsc(
+            Long id);
 }
