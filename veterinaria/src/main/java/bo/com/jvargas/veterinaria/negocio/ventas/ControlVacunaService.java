@@ -8,6 +8,6 @@ import bo.com.jvargas.veterinaria.datos.model.dto.ControlVacunaDto;
 
 public interface ControlVacunaService {
     void insertarVacuna(ControlVacunaDto nuevaVacuna);
-    void actualizarVacuna(Long idVacuna, Long idHistorial,
+    void actualizarVacuna(Long idVacuna,
                           ControlVacunaDto nuevaVacuna);
 }

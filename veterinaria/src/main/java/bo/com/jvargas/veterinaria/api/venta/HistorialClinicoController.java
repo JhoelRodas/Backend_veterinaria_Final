@@ -74,10 +74,9 @@ public class HistorialClinicoController {
     @PutMapping("/control")
     public ResponseEntity<?> actualizarControl(
             @RequestParam("idVacuna") Long idVacuna,
-            @RequestParam("idHitorial") Long idHistorial,
             @RequestBody ControlVacunaDto nuevoControl) {
         try {
-            controlVacunaService.actualizarVacuna(idVacuna, idHistorial, nuevoControl);
+            controlVacunaService.actualizarVacuna(idVacuna, nuevoControl);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

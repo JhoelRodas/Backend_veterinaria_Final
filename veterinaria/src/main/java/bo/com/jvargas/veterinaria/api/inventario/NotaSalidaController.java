@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/notaventa")
+@RequestMapping("/api/notasalida")
 public class NotaSalidaController {
     private final NotaSalidaService service;
 

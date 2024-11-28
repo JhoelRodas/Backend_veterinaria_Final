@@ -9,6 +9,7 @@ import bo.com.jvargas.veterinaria.datos.repository.ventas.VacunaRepository;
 import bo.com.jvargas.veterinaria.negocio.ventas.ControlVacunaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -27,6 +28,7 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
     private final HistorialClinicoRepository historialClinicoRepository;
 
     @Override
+    @Transactional
     public void insertarVacuna(ControlVacunaDto nuevaVacuna) {
         Vacuna vacuna = obtenerVacuna(nuevaVacuna.getIdVacuna());
         HistorialClinico historial = obtenerHistorial(nuevaVacuna.getIdHistorial());
@@ -42,6 +44,7 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
                 ));
 
         producto.setStock((short) (producto.getStock() - 1));
+        productoRepository.save(producto);
         return vacunaRepository.findByIdAndDeletedFalse(idVacuna).orElseThrow(
                 () -> new IllegalArgumentException(
                         "No existe el producto con el ID " + idVacuna
@@ -59,12 +62,7 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
     private ControlVacuna ajustarControl(
             Vacuna vacuna, HistorialClinico historial,
             ControlVacunaDto nuevaVacuna) {
-        ControlVacunaId controlVacunaId = new ControlVacunaId();
-        controlVacunaId.setIdVacuna(vacuna.getId());
-        controlVacunaId.setIdHistorial(historial.getId());
-
         ControlVacuna controlVacuna = new ControlVacuna();
-        controlVacuna.setId(controlVacunaId);
         controlVacuna.setIdVacuna(vacuna);
         controlVacuna.setIdHistorial(historial);
         controlVacuna.setFechaColocada(LocalDate.now());
@@ -75,7 +73,8 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
     }
 
     @Override
-    public void actualizarVacuna(Long idVacuna, Long idHistorial,
+    @Transactional
+    public void actualizarVacuna(Long idVacuna,
                                  ControlVacunaDto nuevoControl) {
         // 1. Obtener el registro de la vacuna aplicada
         Producto vacunaAplicada = productoRepository.findByIdAndDeletedFalse(idVacuna)
@@ -84,8 +83,7 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
         // 2. Verificar si la vacuna nueva es la misma que la original
         if (vacunaAplicada.getId().equals(nuevoControl.getIdVacuna())) {
             // Si la vacuna es la misma, solo actualiza las fechas
-            ControlVacuna controlVacuna = controlVacunaRepository.findById(
-                    new ControlVacunaId(idVacuna, idHistorial))
+            ControlVacuna controlVacuna = controlVacunaRepository.findById(idVacuna)
                     .orElseThrow(() -> new RuntimeException("Nueva vacuna no encontrada"));
             controlVacuna.setFechaColocada(nuevoControl.getFechaColocada());
             controlVacuna.setProximaDosis(nuevoControl.getProximaDosis());
@@ -113,8 +111,7 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
         }
 
         // 6. Actualizar el registro en el historial clínico
-        ControlVacuna controlVacuna = controlVacunaRepository.findById(
-                        new ControlVacunaId(idVacuna, idHistorial))
+        ControlVacuna controlVacuna = controlVacunaRepository.findById(idVacuna)
                 .orElseThrow(() -> new RuntimeException("Nueva vacuna no encontrada"));
         Vacuna nuevaVacuna2 = vacunaRepository.findByIdAndDeletedFalse(nuevoControl.getIdVacuna())
                         .orElseThrow(() -> new IllegalArgumentException(

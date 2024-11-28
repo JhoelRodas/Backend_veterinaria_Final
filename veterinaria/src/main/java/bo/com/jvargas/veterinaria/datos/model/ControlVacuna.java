@@ -5,23 +5,24 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "control_vacuna")
-public class ControlVacuna {
-    @EmbeddedId
-    private ControlVacunaId id;
+public class ControlVacuna extends AuditableEntity implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
 
-    @MapsId("idVacuna")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_vacuna", nullable = false)
     private Vacuna idVacuna;
-
-    @MapsId("idHistorial")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "id_historial", nullable = false)
     private HistorialClinico idHistorial;
 

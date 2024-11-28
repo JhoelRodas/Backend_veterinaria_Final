@@ -17,6 +17,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class ControlVacunaDto {
+    private Long id;
     private Long idVacuna;
     private Long idHistorial;
     private String nombre;
@@ -28,7 +29,9 @@ public class ControlVacunaDto {
 
     public static ControlVacunaDto toDto(ControlVacuna controlVacuna) {
         return ControlVacunaDto.builder()
-                .idVacuna(controlVacuna.getId().getIdVacuna())
+                .id(controlVacuna.getId())
+                .idVacuna(controlVacuna.getIdVacuna().getId())
+                .idHistorial(controlVacuna.getIdHistorial().getId())
                 .descripcion(controlVacuna.getDescripcion())
                 .fechaColocada(controlVacuna.getFechaColocada())
                 .proximaDosis(controlVacuna.getProximaDosis())
