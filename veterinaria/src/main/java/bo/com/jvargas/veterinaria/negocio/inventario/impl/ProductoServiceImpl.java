@@ -71,7 +71,7 @@ public class ProductoServiceImpl implements ProductoService {
         productoBuscado.setPrecioUnitario(producto.getPrecioUnitario());
         productoBuscado.setStock(producto.getStock());
         productoBuscado.setDescripcion(producto.getDescripcion());
-        Categoria categoria = categoriaRepository.findById(id)
+        Categoria categoria = categoriaRepository.findById(producto.getIdCategoria())
                 .orElseThrow(() -> new RuntimeException("categoria no encontrado"));
         productoBuscado.setIdCategoria(categoria);
 
