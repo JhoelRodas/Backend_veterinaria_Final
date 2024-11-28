@@ -111,6 +111,10 @@ public class NotaSalidaServiceImpl implements NotaSalidaService {
         );
 
         notaEditada.setDeleted(true);
+        Producto productoAnt = getProducto(notaEditada.getProducto().getId());
+        //Devolvemos el stock
+        productoAnt.setStock((short) (productoAnt.getStock() + notaEditada.getCantidad()));
+        productoRepository.save(productoAnt);
         repository.save(notaEditada);
     }
 }

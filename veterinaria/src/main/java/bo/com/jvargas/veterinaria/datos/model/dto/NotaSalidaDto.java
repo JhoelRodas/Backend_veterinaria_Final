@@ -28,6 +28,7 @@ public class NotaSalidaDto {
     public static NotaSalidaDto toDto(NotaSalida notaSalida) {
         return NotaSalidaDto.builder()
                 .id(notaSalida.getId())
+                .idProducto(notaSalida.getProducto().getId())
                 .nombreProducto(notaSalida.getProducto().getNombre())
                 .cantidad(notaSalida.getCantidad())
                 .fecha(notaSalida.getFecha())
