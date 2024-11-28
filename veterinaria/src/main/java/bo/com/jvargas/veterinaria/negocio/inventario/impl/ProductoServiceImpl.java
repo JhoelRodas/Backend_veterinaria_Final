@@ -50,8 +50,8 @@ public class ProductoServiceImpl implements ProductoService {
         //Verifica si el producto es de categoria vacuna
         Optional<Categoria> categoriaVacuna = categoriaRepository
                 .findByDeletedFalseAndNombreIgnoreCase("vacuna");
-        Long idCategoriaVacuna = categoriaVacuna.orElseThrow().getId();
-        if (producto.getIdCategoria().getId().equals(idCategoriaVacuna)) {
+        if (categoriaVacuna.isPresent()) {
+            Long idCategoriaVacuna = categoriaVacuna.get().getId();
             Vacuna vacuna= new Vacuna();
             vacuna.setId(productoGuardado.getId());
             vacunaRepository.save(vacuna);
