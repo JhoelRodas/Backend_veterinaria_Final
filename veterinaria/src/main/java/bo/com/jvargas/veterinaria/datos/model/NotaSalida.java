@@ -1,5 +1,6 @@
 package bo.com.jvargas.veterinaria.datos.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import javax.persistence.*;
@@ -24,6 +25,7 @@ public class NotaSalida extends AuditableEntity implements Serializable {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
 
