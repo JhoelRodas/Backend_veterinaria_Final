@@ -23,7 +23,7 @@ public class NotaSalidaController {
     }
 
     @PostMapping
-    public ResponseEntity<?> registrarNota(NotaSalidaDto nuevaNota) {
+    public ResponseEntity<?> registrarNota(@RequestBody NotaSalidaDto nuevaNota) {
         try {
             service.registrar(nuevaNota);
             return ResponseEntity.status(HttpStatus.CREATED).build();

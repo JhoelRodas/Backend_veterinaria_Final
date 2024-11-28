@@ -52,9 +52,11 @@ public class ProductoServiceImpl implements ProductoService {
                 .findByDeletedFalseAndNombreIgnoreCase("vacuna");
         if (categoriaVacuna.isPresent()) {
             Long idCategoriaVacuna = categoriaVacuna.get().getId();
-            Vacuna vacuna= new Vacuna();
-            vacuna.setId(productoGuardado.getId());
-            vacunaRepository.save(vacuna);
+            if (producto.getIdCategoria().getId().equals(idCategoriaVacuna)) {
+                Vacuna vacuna= new Vacuna();
+                vacuna.setId(productoGuardado.getId());
+                vacunaRepository.save(vacuna);
+            }
         }
 
         bitacoraService.info(TipoProceso.GESTIONAR_PRODUCTO,
