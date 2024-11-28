@@ -81,26 +81,23 @@ public class NotaSalidaServiceImpl implements NotaSalidaService {
             productoRepository.save(nuevoProducto);
 
             notaEditar.setProducto(nuevoProducto);
-        }
+        } else {
+            Producto producto = getProducto(notaEditar.getProducto().getId());
+            if (nuevaNota.getCantidad() > notaEditar.getCantidad()) {
+                if (nuevaNota.getCantidad() > producto.getStock() + notaEditar.getCantidad())
+                    throw new IllegalArgumentException("La cantidad excede al inventario");
 
+                producto.setStock((short) (producto.getStock() -
+                        (nuevaNota.getCantidad() - notaEditar.getCantidad())));
+                productoRepository.save(producto);
+            } else {
+                producto.setStock((short) (producto.getStock() +
+                        (notaEditar.getCantidad() - nuevaNota.getCantidad())));
+                productoRepository.save(producto);
+            }
+        }
         notaEditar.setFecha(nuevaNota.getFecha());
         notaEditar.setCantidad(nuevaNota.getCantidad());
-        Producto producto = getProducto(notaEditar.getProducto().getId());
-        if (nuevaNota.getCantidad() > notaEditar.getCantidad()) {
-            if (nuevaNota.getCantidad() > producto.getStock())
-                throw new IllegalArgumentException("La cantidad excede al inventario");
-
-            producto.setStock((short) (producto.getStock() - nuevaNota.getCantidad()));
-            productoRepository.save(producto);
-        }
-        if (nuevaNota.getCantidad() < notaEditar.getCantidad()) {
-            if (nuevaNota.getCantidad() > producto.getStock())
-                throw new IllegalArgumentException("La cantidad excede al inventario");
-
-            producto.setStock((short) (producto.getStock() +
-                    (notaEditar.getCantidad() - nuevaNota.getCantidad())));
-            productoRepository.save(producto);
-        }
         notaEditar.setMotivo(nuevaNota.getMotivo());
     }
 
