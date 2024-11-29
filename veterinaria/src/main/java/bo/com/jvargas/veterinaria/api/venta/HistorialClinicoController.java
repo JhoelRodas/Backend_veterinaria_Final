@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author GERSON
  */
@@ -73,10 +75,10 @@ public class HistorialClinicoController {
 
     @PutMapping("/control")
     public ResponseEntity<?> actualizarControl(
-            @RequestParam("idVacuna") Long idVacuna,
+            @RequestParam("id") Long id,
             @RequestBody ControlVacunaDto nuevoControl) {
         try {
-            controlVacunaService.actualizarVacuna(idVacuna, nuevoControl);
+            controlVacunaService.actualizarVacuna(id, nuevoControl);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -89,6 +91,20 @@ public class HistorialClinicoController {
         try {
             service.eliminarHistorial(id);
             return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/control/vacunas")
+    public ResponseEntity<?> obtenerControlVacunasPorHistorial(
+            @RequestParam("idHistorial") Long idHistorial) {
+        try {
+            List<ControlVacunaDto> controlVacunas =
+                    controlVacunaService.obtenerControlVacunasPorHistorial(
+                            idHistorial);
+            return ResponseEntity.ok(controlVacunas);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());

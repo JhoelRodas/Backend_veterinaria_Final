@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author GERSON
@@ -74,17 +76,17 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
 
     @Override
     @Transactional
-    public void actualizarVacuna(Long idVacuna,
+    public void actualizarVacuna(Long idControl,
                                  ControlVacunaDto nuevoControl) {
+        ControlVacuna controlVacuna = getControlVacuna(idControl);
         // 1. Obtener el registro de la vacuna aplicada
-        Producto vacunaAplicada = productoRepository.findByIdAndDeletedFalse(idVacuna)
-                .orElseThrow(() -> new RuntimeException("Registro de vacuna aplicada no encontrado"));
+        Producto vacunaAplicada = getProducto(controlVacuna.getIdVacuna().getId());
 
         // 2. Verificar si la vacuna nueva es la misma que la original
         if (vacunaAplicada.getId().equals(nuevoControl.getIdVacuna())) {
             // Si la vacuna es la misma, solo actualiza las fechas
-            ControlVacuna controlVacuna = controlVacunaRepository.findById(idVacuna)
-                    .orElseThrow(() -> new RuntimeException("Nueva vacuna no encontrada"));
+//            ControlVacuna controlVacuna = controlVacunaRepository.findById(idVacuna)
+//                    .orElseThrow(() -> new RuntimeException("Nueva vacuna no encontrada"));
             controlVacuna.setFechaColocada(nuevoControl.getFechaColocada());
             controlVacuna.setProximaDosis(nuevoControl.getProximaDosis());
             controlVacuna.setDescripcion(nuevoControl.getDescripcion());
@@ -93,14 +95,12 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
         }
 
         // 3. Restaurar el stock de la vacuna original
-        Producto vacunaOriginal = productoRepository.findByIdAndDeletedFalse(idVacuna)
-                .orElseThrow(() -> new RuntimeException("Registro de vacuna aplicada no encontrado"));
+        Producto vacunaOriginal = getProducto(controlVacuna.getIdVacuna().getId());
         vacunaOriginal.setStock((short) (vacunaOriginal.getStock() + 1));
         productoRepository.save(vacunaOriginal);
 
         // 4. Obtener la nueva vacuna
-        Producto nuevaVacuna = productoRepository.findByIdAndDeletedFalse(nuevoControl.getIdVacuna())
-                .orElseThrow(() -> new RuntimeException("Registro de vacuna aplicada no encontrado"));
+        Producto nuevaVacuna = getProducto(nuevoControl.getIdVacuna());
 
         // 5. Reducir el stock de la nueva vacuna
         if (nuevaVacuna.getStock() > 0) {
@@ -111,8 +111,6 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
         }
 
         // 6. Actualizar el registro en el historial clínico
-        ControlVacuna controlVacuna = controlVacunaRepository.findById(idVacuna)
-                .orElseThrow(() -> new RuntimeException("Nueva vacuna no encontrada"));
         Vacuna nuevaVacuna2 = vacunaRepository.findByIdAndDeletedFalse(nuevoControl.getIdVacuna())
                         .orElseThrow(() -> new IllegalArgumentException(
                                 "Registro de vacuna aplicada no encontrado"
@@ -122,5 +120,43 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
         controlVacuna.setProximaDosis(nuevoControl.getProximaDosis());
         controlVacuna.setDescripcion(nuevoControl.getDescripcion());
         controlVacunaRepository.save(controlVacuna);
+    }
+
+    private ControlVacuna getControlVacuna(Long id) {
+        return controlVacunaRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException(
+                        "No existe un control de vacuna con el ID " + id
+                )
+        );
+    }
+
+    private Producto getProducto(Long id) {
+        return productoRepository.findByIdAndDeletedFalse(id).orElseThrow(
+                () -> new IllegalArgumentException(
+                        "Producto con ID " + id + " no encontrado"
+                )
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ControlVacunaDto> obtenerControlVacunasPorHistorial(Long idHistorial) {
+        // Obtenemos la lista de ControlVacuna asociada al idHistorial
+        List<ControlVacunaDto> controlVacunas = controlVacunaRepository
+                .findAllByIdHistorial_IdOrderByFechaColocadaAsc(idHistorial)
+                .stream().map(ControlVacunaDto::toDto).toList();
+
+        // Convertimos cada ControlVacuna en un ControlVacunaDto
+        actalizarListaConNombre(controlVacunas);
+        return controlVacunas;
+    }
+
+    private void actalizarListaConNombre(List<ControlVacunaDto> vacunas) {
+        for (ControlVacunaDto vacunaDto : vacunas) {
+            Optional<Producto> o = productoRepository
+                    .findByIdAndDeletedFalse(vacunaDto.getIdVacuna());
+            String nombreVacuna = o.orElseThrow().getNombre();
+            vacunaDto.setNombre(nombreVacuna);
+        }
     }
 }
