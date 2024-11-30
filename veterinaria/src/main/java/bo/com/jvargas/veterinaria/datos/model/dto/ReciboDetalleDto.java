@@ -27,6 +27,7 @@ public class ReciboDetalleDto {
     private String extension;
     private String nombre;
     private List<DetalleProductoDto> detalles;
+    private List<DetalleServicioDto> detallesServicios;
 
     public static Recibo toEntity(ReciboDetalleDto reciboDetalleDto) {
         return Recibo.builder()
@@ -39,7 +40,8 @@ public class ReciboDetalleDto {
     }
 
     public static ReciboDetalleDto toDto (
-            Recibo recibo, List<DetalleProductoDto> detalles) {
+            Recibo recibo, List<DetalleProductoDto> detalles,
+            List<DetalleServicioDto> detallesServicios) {
         return ReciboDetalleDto.builder()
                 .id(recibo.getId())
                 .fecha(recibo.getFecha())
@@ -49,6 +51,7 @@ public class ReciboDetalleDto {
                 .extension(recibo.getIdCliente().getExtension())
                 .nombre(recibo.getIdCliente().getNombre())
                 .detalles(detalles)
+                .detallesServicios(detallesServicios)
                 .build();
     }
 }

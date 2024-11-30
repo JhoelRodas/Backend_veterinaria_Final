@@ -3,12 +3,14 @@ package bo.com.jvargas.veterinaria.negocio.ventas.impl;
 import bo.com.jvargas.veterinaria.datos.model.Cliente;
 import bo.com.jvargas.veterinaria.datos.model.Recibo;
 import bo.com.jvargas.veterinaria.datos.model.dto.DetalleProductoDto;
+import bo.com.jvargas.veterinaria.datos.model.dto.DetalleServicioDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.ReciboDetalleDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.ReciboDto;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ClienteRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ReciboRepository;
 import bo.com.jvargas.veterinaria.negocio.ventas.ClienteService;
 import bo.com.jvargas.veterinaria.negocio.ventas.DetalleProductoService;
+import bo.com.jvargas.veterinaria.negocio.ventas.DetalleServicioService;
 import bo.com.jvargas.veterinaria.negocio.ventas.ReciboService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class ReciboServiceImpl implements ReciboService {
     private final ClienteRepository clienteRepository;
     private final DetalleProductoService detalleService;
     private final ClienteService clienteService;
+    private final DetalleServicioService detalleServicioService;
 
     @Override
     @Transactional(readOnly = true)
@@ -49,7 +52,9 @@ public class ReciboServiceImpl implements ReciboService {
         Long idRecibo = recibo.getId();
         List<DetalleProductoDto> detalles = detalleService
                 .listarDetalles(idRecibo);
-        return ReciboDetalleDto.toDto(recibo, detalles);
+        List<DetalleServicioDto> detalleServicio = detalleServicioService
+                .listar(idRecibo);
+        return ReciboDetalleDto.toDto(recibo, detalles, detalleServicio);
     }
 
     @Transactional(readOnly = true)
@@ -74,8 +79,10 @@ public class ReciboServiceImpl implements ReciboService {
         Recibo reciboGuardado = reciboRepository.save(reciboAGuardar);
         Long idReciboGuardado = reciboGuardado.getId();
         List<DetalleProductoDto> detalles = nuevoRecibo.getDetalles();
-        actualizarIdReciboEnLosDetalles(idReciboGuardado, detalles);
+        List<DetalleServicioDto> detalleServicio = nuevoRecibo.getDetallesServicios();
+        actualizarIdReciboEnLosDetalles(idReciboGuardado, detalles, detalleServicio);
         detalleService.insertarDetallesProductos(detalles);
+        detalleServicioService.insertarDetallesServicios(detalleServicio);
     }
 
     private Cliente getCliente(ReciboDetalleDto nuevoRecibo) {
@@ -96,9 +103,14 @@ public class ReciboServiceImpl implements ReciboService {
     }
 
     private void actualizarIdReciboEnLosDetalles(
-            Long idRecibo, List<DetalleProductoDto> detalles) {
+            Long idRecibo, List<DetalleProductoDto> detalles,
+            List<DetalleServicioDto> detalleServicios) {
         for (DetalleProductoDto detalle : detalles) {
             detalle.setIdRecibo(idRecibo);
+        }
+
+        for (DetalleServicioDto servicioDto : detalleServicios) {
+            servicioDto.setIdRecibo(idRecibo);
         }
     }
 

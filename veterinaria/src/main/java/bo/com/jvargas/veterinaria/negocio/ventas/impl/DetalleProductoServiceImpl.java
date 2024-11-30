@@ -87,6 +87,10 @@ public class DetalleProductoServiceImpl implements DetalleProductoService {
                     " excede el stock disponible");
         }
 
+        // Restar el stock del producto
+        producto.setStock((short) (producto.getStock() - nuevoDetalle.getCant()));
+        productoRepository.save(producto); // Guardar la actualización del stock
+
         DetalleProducto detalleProducto = new DetalleProducto();
         DetalleProductoId detalleProductoId = new DetalleProductoId(
                 recibo.getId(), producto.getId());
