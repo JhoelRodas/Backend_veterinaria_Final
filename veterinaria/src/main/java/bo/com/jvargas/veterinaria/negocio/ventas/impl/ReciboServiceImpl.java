@@ -16,10 +16,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -75,14 +75,38 @@ public class ReciboServiceImpl implements ReciboService {
         reciboAGuardar.setFecha(LocalDate.now());
         Cliente cliente = getCliente(nuevoRecibo);
         reciboAGuardar.setIdCliente(cliente);
+        BigDecimal montoTotal = calcularMontoTotal(
+                nuevoRecibo.getDetalles(), nuevoRecibo.getDetallesServicios());
+        reciboAGuardar.setMontoTotal(montoTotal);
 
         Recibo reciboGuardado = reciboRepository.save(reciboAGuardar);
         Long idReciboGuardado = reciboGuardado.getId();
         List<DetalleProductoDto> detalles = nuevoRecibo.getDetalles();
         List<DetalleServicioDto> detalleServicio = nuevoRecibo.getDetallesServicios();
         actualizarIdReciboEnLosDetalles(idReciboGuardado, detalles, detalleServicio);
-        detalleService.insertarDetallesProductos(detalles);
-        detalleServicioService.insertarDetallesServicios(detalleServicio);
+        if (!detalles.isEmpty())
+            detalleService.insertarDetallesProductos(detalles);
+
+        if (!detalleServicio.isEmpty())
+            detalleServicioService.insertarDetallesServicios(detalleServicio);
+    }
+
+    private BigDecimal calcularMontoTotal(List<DetalleProductoDto> productos,
+                                          List<DetalleServicioDto> servicios) {
+        BigDecimal montoTotal = new BigDecimal(0);
+        if (!productos.isEmpty()) {
+            for (DetalleProductoDto productoDto : productos) {
+                montoTotal = montoTotal.add(productoDto.getMonto());
+            }
+        }
+
+        if (!servicios.isEmpty()) {
+            for (DetalleServicioDto servicioDto : servicios) {
+                montoTotal = montoTotal.add(servicioDto.getMonto());
+            }
+        }
+
+        return montoTotal;
     }
 
     private Cliente getCliente(ReciboDetalleDto nuevoRecibo) {
@@ -105,12 +129,17 @@ public class ReciboServiceImpl implements ReciboService {
     private void actualizarIdReciboEnLosDetalles(
             Long idRecibo, List<DetalleProductoDto> detalles,
             List<DetalleServicioDto> detalleServicios) {
-        for (DetalleProductoDto detalle : detalles) {
-            detalle.setIdRecibo(idRecibo);
+
+        if (!detalles.isEmpty()) {
+            for (DetalleProductoDto detalle : detalles) {
+                detalle.setIdRecibo(idRecibo);
+            }
         }
 
-        for (DetalleServicioDto servicioDto : detalleServicios) {
-            servicioDto.setIdRecibo(idRecibo);
+        if (!detalleServicios.isEmpty()) {
+            for (DetalleServicioDto servicioDto : detalleServicios) {
+                servicioDto.setIdRecibo(idRecibo);
+            }
         }
     }
 
