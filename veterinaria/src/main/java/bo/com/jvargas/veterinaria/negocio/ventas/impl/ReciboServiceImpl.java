@@ -84,23 +84,23 @@ public class ReciboServiceImpl implements ReciboService {
         List<DetalleProductoDto> detalles = nuevoRecibo.getDetalles();
         List<DetalleServicioDto> detalleServicio = nuevoRecibo.getDetallesServicios();
         actualizarIdReciboEnLosDetalles(idReciboGuardado, detalles, detalleServicio);
-        if (!detalles.isEmpty())
+        if (detalles != null && !detalles.isEmpty())
             detalleService.insertarDetallesProductos(detalles);
 
-        if (!detalleServicio.isEmpty())
+        if (detalleServicio != null && !detalleServicio.isEmpty())
             detalleServicioService.insertarDetallesServicios(detalleServicio);
     }
 
     private BigDecimal calcularMontoTotal(List<DetalleProductoDto> productos,
                                           List<DetalleServicioDto> servicios) {
         BigDecimal montoTotal = new BigDecimal(0);
-        if (!productos.isEmpty()) {
+        if (productos != null && !productos.isEmpty()) {
             for (DetalleProductoDto productoDto : productos) {
                 montoTotal = montoTotal.add(productoDto.getMonto());
             }
         }
 
-        if (!servicios.isEmpty()) {
+        if (servicios != null && !servicios.isEmpty()) {
             for (DetalleServicioDto servicioDto : servicios) {
                 montoTotal = montoTotal.add(servicioDto.getMonto());
             }
@@ -130,13 +130,13 @@ public class ReciboServiceImpl implements ReciboService {
             Long idRecibo, List<DetalleProductoDto> detalles,
             List<DetalleServicioDto> detalleServicios) {
 
-        if (!detalles.isEmpty()) {
+        if (detalles != null && !detalles.isEmpty()) {
             for (DetalleProductoDto detalle : detalles) {
                 detalle.setIdRecibo(idRecibo);
             }
         }
 
-        if (!detalleServicios.isEmpty()) {
+        if (detalleServicios != null && !detalleServicios.isEmpty()) {
             for (DetalleServicioDto servicioDto : detalleServicios) {
                 servicioDto.setIdRecibo(idRecibo);
             }
