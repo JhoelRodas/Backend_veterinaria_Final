@@ -14,14 +14,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.management.OperationsException;
+
+import java.io.IOException;
+import java.time.LocalDate;
 
 import static org.springframework.http.ResponseEntity.ok;
 @Slf4j
@@ -54,4 +56,20 @@ public class ReporteController {
         }
     }
 
+
+    @GetMapping("/reportes/ventas/excel")
+    public ResponseEntity<byte[]> descargarReporteVentas(
+            @RequestParam("from") String from,
+            @RequestParam("to") String to) throws IOException {
+
+        LocalDate fechaInicio = LocalDate.parse(from);
+        LocalDate fechaFin = LocalDate.parse(to);
+
+        byte[] excel = reporteService.generarReporteVentasExcel(fechaInicio, fechaFin);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte-ventas.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(excel);
+    }
 }

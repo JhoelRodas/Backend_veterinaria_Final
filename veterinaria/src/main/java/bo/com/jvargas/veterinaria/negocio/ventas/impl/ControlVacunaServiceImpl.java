@@ -11,10 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @author GERSON
@@ -67,7 +65,8 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
         ControlVacuna controlVacuna = new ControlVacuna();
         controlVacuna.setIdVacuna(vacuna);
         controlVacuna.setIdHistorial(historial);
-        controlVacuna.setFechaColocada(LocalDate.now());
+//        controlVacuna.setFechaColocada(LocalDate.now());
+        controlVacuna.setFechaColocada(nuevaVacuna.getFechaColocada());
         controlVacuna.setDescripcion(nuevaVacuna.getDescripcion());
         controlVacuna.setProximaDosis(nuevaVacuna.getProximaDosis());
 
