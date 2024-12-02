@@ -12,4 +12,6 @@ import java.util.List;
 
 public interface DetalleRepository extends JpaRepository<Detalle, DetalleId> {
     List<Detalle> findAllByIdNotaCompra_Id(Long idNotaCompra);
+
+    List<Detalle> findAllByIdProducto_IdAndIdNotaCompra_DeletedFalse(Long id);
 }

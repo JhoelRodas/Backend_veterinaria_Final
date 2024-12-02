@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -74,7 +76,6 @@ public class DetalleServiceImpl implements DetalleService {
         Producto producto = optionalProducto.get();
         NotaCompra notaCompra = optionalNotaCompra.get();
 
-        // Crear el detalle y guardar en la base de datos (el trigger calculará el monto)
         Detalle detalle = new Detalle();
         detalle.setId(new DetalleId(detalleDto.getIdProducto(), detalleDto.getIdNotaCompra()));
         detalle.setIdProducto(producto);
@@ -116,9 +117,36 @@ public class DetalleServiceImpl implements DetalleService {
             Detalle detalle = getDetalle(detalleDto, optionalNotaCompra,
                     optionalProducto);
             detalles.add(detalle);
+            actualizarCostosProducto(detalleDto);
         }
 
         return detalles;
+    }
+
+    private void actualizarCostosProducto(DetalleDto detalle) {
+        Optional<Producto> optionalProducto = productoRepository.findByIdAndDeletedFalse(detalle.getIdProducto());
+
+        if (optionalProducto.isPresent()) {
+            Producto producto = optionalProducto.get();
+
+            // Calcular nuevo costo promedio y costo de compra
+            BigDecimal stockActual = new BigDecimal(producto.getStock());
+            BigDecimal nuevoStock = new BigDecimal(detalle.getCantidad());
+            BigDecimal costoPromedioActual = producto.getCostoPromedio();
+            BigDecimal nuevoCostoCompra = detalle.getMonto().divide(nuevoStock, RoundingMode.HALF_UP);
+
+            // Fórmula de promedio ponderado
+            BigDecimal nuevoCostoPromedio = (stockActual.multiply(costoPromedioActual)
+                    .add(nuevoStock.multiply(nuevoCostoCompra)))
+                    .divide(stockActual.add(nuevoStock), RoundingMode.HALF_UP);
+
+            // Actualizar valores en el producto
+            producto.setCostoPromedio(nuevoCostoPromedio);
+            producto.setCostoCompra(nuevoCostoCompra);
+
+            // Guardar producto actualizado
+            productoRepository.save(producto);
+        }
     }
 
     @Transactional
@@ -130,6 +158,46 @@ public class DetalleServiceImpl implements DetalleService {
         if (oDetalle.isEmpty())
             throw new RuntimeException("Detalle no encontrado");
 
-        detalleRepository.delete(oDetalle.get());
+//        detalleRepository.delete(oDetalle.get());
+
+        // Recalcular costos del producto tras eliminar el detalle
+        recalcularCostosProducto(idProducto);
+    }
+
+    private void recalcularCostosProducto(Long idProducto) {
+        Optional<Producto> optionalProducto = productoRepository.findByIdAndDeletedFalse(idProducto);
+
+        if (optionalProducto.isPresent()) {
+            Producto producto = optionalProducto.get();
+
+            // Obtener detalles asociados a notas de compra activas
+            List<Detalle> detallesActivos = detalleRepository
+                    .findAllByIdProducto_IdAndIdNotaCompra_DeletedFalse(idProducto);
+
+            BigDecimal nuevoCostoPromedio = BigDecimal.ZERO;
+            BigDecimal nuevoCostoCompra = BigDecimal.ZERO;
+            BigDecimal totalStock = BigDecimal.ZERO;
+
+            for (Detalle detalle : detallesActivos) {
+                BigDecimal cantidad = new BigDecimal(detalle.getCantidad());
+                BigDecimal costoUnitario = detalle.getMonto().divide(cantidad, RoundingMode.HALF_UP);
+
+                nuevoCostoCompra = costoUnitario; // Último costo de compra
+                nuevoCostoPromedio = nuevoCostoPromedio.add(cantidad.multiply(costoUnitario));
+                totalStock = totalStock.add(cantidad);
+            }
+
+            // Si hay stock restante, calcular costo promedio
+            if (totalStock.compareTo(BigDecimal.ZERO) > 0) {
+                nuevoCostoPromedio = nuevoCostoPromedio.divide(totalStock, RoundingMode.HALF_UP);
+            }
+
+            // Actualizar el producto
+            producto.setCostoPromedio(nuevoCostoPromedio);
+            producto.setCostoCompra(nuevoCostoCompra);
+            producto.setStock(totalStock.shortValue());
+
+            productoRepository.save(producto);
+        }
     }
 }

@@ -15,5 +15,7 @@ public interface AtencionService{
 
     void guardarAtencion(AtencionDto atencionNueva);
 
+    void actualizarAtencion(Long idAtencion, AtencionDto atencionNueva);
+
     void borrarAtencion(Long id);
 }

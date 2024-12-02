@@ -32,6 +32,9 @@ public class Atencion extends AuditableEntity implements Serializable {
     @Column(name = "anamnesis", nullable = false, length = 100)
     private String anamnesis;
 
+    @Column(name = "descripcion", nullable = false, length = 150)
+    private String descripcion;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_mascota", nullable = false)
     private Mascota idMascota;

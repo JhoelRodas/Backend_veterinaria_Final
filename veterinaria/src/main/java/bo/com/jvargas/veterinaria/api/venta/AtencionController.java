@@ -45,6 +45,19 @@ public class AtencionController {
         }
     }
 
+    @PutMapping
+    public ResponseEntity<?> actualizar(
+            @RequestParam("id") Long id,
+            @RequestBody AtencionDto nuevaAtencion) {
+        try {
+            service.actualizarAtencion(id, nuevaAtencion);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         try {

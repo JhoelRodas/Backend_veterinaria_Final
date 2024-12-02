@@ -93,6 +93,20 @@ public class AtencionServiceImpl implements AtencionService {
 
     @Override
     @Transactional
+    public void actualizarAtencion(Long idAtencion, AtencionDto atencionNueva) {
+        Atencion atencionActual = getAtencion(idAtencion);
+        actualizarDatos(atencionActual, atencionNueva);
+        atencionRepository.save(atencionActual);
+    }
+
+    private void actualizarDatos(Atencion atencionActual,
+                                 AtencionDto atencionNueva) {
+        atencionActual.setDescripcion(atencionNueva.getDescripcion());
+        atencionActual.setAnamnesis(atencionNueva.getAnamnesis());
+    }
+
+    @Override
+    @Transactional
     public void borrarAtencion(Long id) {
         Atencion atencion = getAtencion(id);
         atencion.setDeleted(true);

@@ -1,10 +1,12 @@
 package bo.com.jvargas.veterinaria.negocio.compra.impl;
 
+import bo.com.jvargas.veterinaria.datos.model.Detalle;
 import bo.com.jvargas.veterinaria.datos.model.NotaCompra;
 import bo.com.jvargas.veterinaria.datos.model.Proveedor;
 import bo.com.jvargas.veterinaria.datos.model.dto.DetalleDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.NotaCompraDetalleDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.NotaCompraDto;
+import bo.com.jvargas.veterinaria.datos.repository.compra.DetalleRepository;
 import bo.com.jvargas.veterinaria.datos.repository.compra.NotaCompraRepository;
 import bo.com.jvargas.veterinaria.datos.repository.compra.ProveedorRepository;
 import bo.com.jvargas.veterinaria.negocio.compra.DetalleService;
@@ -37,6 +39,7 @@ public class NotaCompraServiceImpl implements NotaCompraService {
 
     private final NotaCompraRepository notaCompraRepository;
     private final ProveedorRepository proveedorRepository;
+    private final DetalleRepository detalleRepository;
     private final DetalleService detalleService;
 
     @Transactional(readOnly = true)
@@ -199,8 +202,16 @@ public class NotaCompraServiceImpl implements NotaCompraService {
                 findByIdAndDeletedFalse(id).orElseThrow(()->new RuntimeException(
                         "Nota de compra no encontrada o eliminada"));
 
-        notaCompra.setDeleted(true);
+        List<Detalle> listaDeProducto =
+                detalleRepository.findAllByIdNotaCompra_Id(id);
 
+        for (Detalle detalle : listaDeProducto) {
+            detalleService.eliminarDetalle(
+                    detalle.getIdProducto().getId(),
+                    detalle.getIdNotaCompra().getId());
+        }
+
+        notaCompra.setDeleted(true);
         notaCompraRepository.save(notaCompra);
     }
 

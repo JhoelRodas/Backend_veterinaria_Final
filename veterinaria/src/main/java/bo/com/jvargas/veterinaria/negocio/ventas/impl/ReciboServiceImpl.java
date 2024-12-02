@@ -1,11 +1,13 @@
 package bo.com.jvargas.veterinaria.negocio.ventas.impl;
 
 import bo.com.jvargas.veterinaria.datos.model.Cliente;
+import bo.com.jvargas.veterinaria.datos.model.Producto;
 import bo.com.jvargas.veterinaria.datos.model.Recibo;
 import bo.com.jvargas.veterinaria.datos.model.dto.DetalleProductoDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.DetalleServicioDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.ReciboDetalleDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.ReciboDto;
+import bo.com.jvargas.veterinaria.datos.repository.inventario.ProductoRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ClienteRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ReciboRepository;
 import bo.com.jvargas.veterinaria.negocio.ventas.ClienteService;
@@ -32,6 +34,7 @@ public class ReciboServiceImpl implements ReciboService {
     private final DetalleProductoService detalleService;
     private final ClienteService clienteService;
     private final DetalleServicioService detalleServicioService;
+    private final ProductoRepository productoRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -167,7 +170,32 @@ public class ReciboServiceImpl implements ReciboService {
             throw new RuntimeException("No existe un recibo con el ID " + id);
 
         Recibo recibo = o.get();
+
+        // Recuperar los detalles de productos asociados al recibo
+        List<DetalleProductoDto> detallesProductos = detalleService.listarDetalles(recibo.getId());
+
+        // Revertir el stock de los productos
+        for (DetalleProductoDto detalle : detallesProductos) {
+            devolverStock(detalle);
+        }
+
+        // Marcar el recibo como anulado
         recibo.setDeleted(true);
         reciboRepository.save(recibo);
+    }
+
+    private void devolverStock(DetalleProductoDto detalle) {
+        Optional<Producto> optionalProducto = productoRepository.findByIdAndDeletedFalse(detalle.getIdProducto());
+        if (optionalProducto.isPresent()) {
+            Producto producto = optionalProducto.get();
+
+            // Sumar la cantidad del detalle al stock actual
+            producto.setStock((short) (producto.getStock() + detalle.getCant()));
+
+            // Guardar el producto actualizado
+            productoRepository.save(producto);
+        } else {
+            throw new RuntimeException("Producto no encontrado para el detalle ID: " + detalle.getIdProducto());
+        }
     }
 }

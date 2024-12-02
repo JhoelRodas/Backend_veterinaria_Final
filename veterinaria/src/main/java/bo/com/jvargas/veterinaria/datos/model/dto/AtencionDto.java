@@ -22,6 +22,7 @@ public class AtencionDto {
     private LocalDate fecha;
     private LocalTime hora;
     private String anamnesis;
+    private String descripcion;
     private Long idMascota;
     private Long idUsuario;
     private String cliente;
@@ -35,6 +36,7 @@ public class AtencionDto {
                 .fecha(atencion.getFecha())
                 .hora(atencion.getHora())
                 .anamnesis(atencion.getAnamnesis())
+                .descripcion(atencion.getDescripcion())
                 .cliente(atencion.getIdMascota().getCiCliente().getNombre())
                 .mascota(atencion.getIdMascota().getNombre())
                 .usuario(atencion.getIdUsuario().getName())
@@ -49,6 +51,7 @@ public class AtencionDto {
                 .fecha(atencionDto.getFecha())
                 .hora(atencionDto.getHora())
                 .anamnesis(atencionDto.getAnamnesis())
+                .descripcion(atencionDto.getDescripcion())
                 .idMascota(null)
                 .idHistorial(null)
                 .idUsuario(null)
