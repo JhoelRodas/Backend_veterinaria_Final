@@ -114,7 +114,6 @@ public class ReciboServiceImpl implements ReciboService {
             for (DetalleProductoDto productoDto : productos) {
                 montoTotal = montoTotal.add(productoDto.getMonto());
             }
-            
         }
 
         if (servicios != null && !servicios.isEmpty()) {
