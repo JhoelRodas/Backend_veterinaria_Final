@@ -51,6 +51,8 @@ public class MascotaServiceImpl implements MascotaService {
         mascotaRepository.save(mascota2);
     }
 
+
+
     @Override
     public void actualizar(Long id, Mascota mascota) {
         Mascota mascotaBuscada = mascotaRepository.findById(id).orElseThrow(() -> new RuntimeException("Cliente no encontrado"));

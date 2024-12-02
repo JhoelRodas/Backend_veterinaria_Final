@@ -1,35 +1,34 @@
 package bo.com.jvargas.veterinaria.negocio.ventas.impl;
 
+import bo.com.jvargas.veterinaria.datos.model.NotaCompra;
+import bo.com.jvargas.veterinaria.datos.model.Recibo;
 import bo.com.jvargas.veterinaria.datos.model.dto.*;
+import bo.com.jvargas.veterinaria.datos.repository.ventas.ReciboRepository;
+import bo.com.jvargas.veterinaria.negocio.compra.NotaCompraService;
 import bo.com.jvargas.veterinaria.negocio.ventas.ReciboService;
 import bo.com.jvargas.veterinaria.negocio.ventas.ReporteService;
 import bo.com.jvargas.veterinaria.utils.OperationException;
 import bo.com.jvargas.veterinaria.utils.ReporteUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import javax.management.OperationsException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-
-
-
-import java.io.ByteArrayOutputStream;
-import java.util.List;
-
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Slf4j
@@ -37,6 +36,9 @@ import java.util.List;
 @Service("reporteService")
 public class ReporteServiceImpl implements ReporteService {
     private final ReciboService reciboService;
+    private final NotaCompraService notaCompraService;
+    private final ReciboRepository reciboRepository;
+
     @Override
     public DocumentoDto descargarReporte(BodyReporteDto bodyReporteDto) throws OperationsException {
         FiltroReporteDto filters = bodyReporteDto.getFiltros();
@@ -89,9 +91,10 @@ public class ReporteServiceImpl implements ReporteService {
             case "Ventas":
                 insertarDataReporteVentas(sheet,cabeceras,filters,rowIndex);
                 break;
-//            case DIRECTORA_PROSPECTO:
-//                insertarDataReporteDirectoraProspecto(sheet,cabeceras,filters,rowIndex);
-//                break;
+            case "Compras":
+                insertarDataReporteCompras(sheet,cabeceras,filters,rowIndex);
+                break;
+
             default:
                 throw new OperationException(String.format("Formato de reporte: '%s' no válido.", tipoReporte));
         }
@@ -99,10 +102,34 @@ public class ReporteServiceImpl implements ReporteService {
     }
 
     private void insertarDataReporteVentas(Sheet sheet, List<CabeceraReporteDto> cabeceras, FiltroReporteDto filters, int rowIndex){
-      //  Pageable pageable = ApiUtil.buildPageableWithSort(0, 200, "id", Sort.Direction.DESC);
-        List<? extends ReporteDto> dataPage = reciboService.listarRecibosReporte(filters.getFrom(), filters.getTo());
+        // Extraer los filtros del objeto FiltroReporteDto
+        LocalDate inicio = filters.getInicio();
+        LocalDate fin = filters.getFin();
+        BigDecimal montoMayor = filters.getMontoMayor();
+        BigDecimal montoMenor = filters.getMontoMenor();
+        String metodoPago = filters.getMetodoPago();
+
+        List<? extends ReporteDto> dataPage = reciboService.listarRecibosReporte(
+                inicio,fin,montoMayor,montoMenor,metodoPago);
+
         ReporteUtil.setDataCellReporte(sheet,dataPage,cabeceras,rowIndex);
     }
+
+    private void insertarDataReporteCompras(Sheet sheet, List<CabeceraReporteDto> cabeceras, FiltroReporteDto filters, int rowIndex){
+        LocalDate inicio = filters.getInicio();
+        LocalDate fin = filters.getFin();
+        BigDecimal montoMayor = filters.getMontoMayor();
+        BigDecimal montoMenor = filters.getMontoMenor();
+        String nombreProveedor = filters.getNombreProveedor();
+
+        List<? extends ReporteDto> dataPage = notaCompraService.listarNotasCompraReporte(
+                inicio,fin,montoMayor,montoMenor,nombreProveedor);
+
+        ReporteUtil.setDataCellReporte(sheet,dataPage,cabeceras,rowIndex);
+    }
+
+
+
 
 
 }

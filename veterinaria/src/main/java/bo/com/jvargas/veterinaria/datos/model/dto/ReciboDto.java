@@ -38,6 +38,16 @@ public class ReciboDto extends ReporteDto {
                 .build();
     }
 
+    // Constructor necesario para la consulta JPQL
+    public ReciboDto(Long id, LocalDate fecha, BigDecimal montoTotal, String metodoPago, String nombreCliente, String ciCliente) {
+        this.id = id;
+        this.fecha = fecha;
+        this.montoTotal = montoTotal;
+        this.metodoPago = metodoPago;
+        this.nombre = nombreCliente;
+        this.ci = ciCliente;
+    }
+
     @Override
     public String getValor(String property) {
         switch (property){
@@ -47,10 +57,10 @@ public class ReciboDto extends ReporteDto {
                 return String.valueOf(getNombre());
             case "ci":
                 return String.valueOf(getCi());
-                case "fecha":
-                    return String.valueOf(getFecha());
-                    case "montoTotal":
-                        return String.valueOf(getMontoTotal());
+            case "fecha":
+                return String.valueOf(getFecha());
+            case "montoTotal":
+                return String.valueOf(getMontoTotal());
             case "metodoPago":
                 return String.valueOf(getMetodoPago());
 

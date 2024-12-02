@@ -203,4 +203,22 @@ public class NotaCompraServiceImpl implements NotaCompraService {
 
         notaCompraRepository.save(notaCompra);
     }
+
+    @Override
+    public List<NotaCompraDto> listarNotasCompraReporte(
+            LocalDate inicio, LocalDate fin, BigDecimal montoMayor,
+            BigDecimal montoMenor, String nombreProveedor) {
+
+        System.out.println("Parámetros recibidos:");
+        System.out.println("Fecha Inicio: " + inicio);
+        System.out.println("Fecha Fin: " + fin);
+        System.out.println("Monto Mayor: " + montoMayor);
+        System.out.println("Monto Menor: " + montoMenor);
+        System.out.println("nombreProveedor: " + nombreProveedor);
+
+        return notaCompraRepository.listaFiltradaReporteCompras(
+                inicio, fin,  montoMayor,
+                montoMenor,  nombreProveedor
+        );
+    }
 }

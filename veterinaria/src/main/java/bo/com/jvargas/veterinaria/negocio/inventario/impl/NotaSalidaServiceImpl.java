@@ -68,12 +68,16 @@ public class NotaSalidaServiceImpl implements NotaSalidaService {
 
     private void actualizarDatos(NotaSalida notaEditar, NotaSalidaDto nuevaNota) {
         if (!notaEditar.getProducto().getId().equals(nuevaNota.getIdProducto())) {
-            Producto productoAnt = getProducto(notaEditar.getProducto().getId());
+            Producto productoAnt = productoRepository.findById(notaEditar.getProducto().getId())
+                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
             //Devolvemos el stock
             productoAnt.setStock((short) (productoAnt.getStock() + notaEditar.getCantidad()));
             productoRepository.save(productoAnt);
+
             //Buscamos el Nuevo producto
-            Producto nuevoProducto = getProducto(nuevaNota.getIdProducto());
+            Producto nuevoProducto = productoRepository.findById(nuevaNota.getIdProducto())
+                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
             if (nuevaNota.getCantidad() > nuevoProducto.getStock())
                 throw new IllegalArgumentException("La cantidad excede al inventario");
 

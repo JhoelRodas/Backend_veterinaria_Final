@@ -57,16 +57,31 @@ public class ReciboServiceImpl implements ReciboService {
         return ReciboDetalleDto.toDto(recibo, detalles, detalleServicio);
     }
 
-    @Transactional(readOnly = true)
     @Override
-    public List<ReciboDto> listarRecibosReporte(Date from, Date to) {
-        LocalDate fromLocal = LocalDate.ofEpochDay(from.getTime());
-        LocalDate toLocal = LocalDate.ofEpochDay(to.getTime());
-        return reciboRepository.listaFiltrada(fromLocal,toLocal).stream()
-                .map(ReciboDto::toDto)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<ReciboDto> listarRecibosReporte(
+            LocalDate inicio, LocalDate fin, BigDecimal montoMayor,
+            BigDecimal montoMenor, String metodoPago) {
+
+
+        System.out.println("Parámetros recibidos:");
+        System.out.println("Fecha Inicio: " + inicio);
+        System.out.println("Fecha Fin: " + fin);
+        System.out.println("Monto Mayor: " + montoMayor);
+        System.out.println("Monto Menor: " + montoMenor);
+        System.out.println("Método de Pago: " + metodoPago);
+
+        return reciboRepository.listaFiltradaReporteVentas(
+                inicio, fin,  montoMayor,
+                 montoMenor,  metodoPago
+        );
     }
 
+//    LocalDate fromLocal = LocalDate.ofEpochDay(from.getTime());
+//    LocalDate toLocal = LocalDate.ofEpochDay(to.getTime());
+//        return reciboRepository.listaFiltrada(fromLocal,toLocal).stream()
+//                .map(ReciboDto::toDto)
+//                .collect(Collectors.toList());
     @Override
     @Transactional
     public void guardarRecibo(ReciboDetalleDto nuevoRecibo) {
@@ -75,6 +90,7 @@ public class ReciboServiceImpl implements ReciboService {
         reciboAGuardar.setFecha(LocalDate.now());
         Cliente cliente = getCliente(nuevoRecibo);
         reciboAGuardar.setIdCliente(cliente);
+
         BigDecimal montoTotal = calcularMontoTotal(
                 nuevoRecibo.getDetalles(), nuevoRecibo.getDetallesServicios());
         reciboAGuardar.setMontoTotal(montoTotal);

@@ -34,4 +34,5 @@ public class DetalleProducto {
     @Column(name = "monto", nullable = false, precision = 5, scale = 2)
     private BigDecimal monto;
 
+
 }

@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NotaCompraDto {
+public class NotaCompraDto extends ReporteDto {
     private Long id;
     private BigDecimal montoTotal;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
@@ -61,5 +61,28 @@ public class NotaCompraDto {
                 .fecha(notaCompraDto.getFecha())
                 .idProveedor(null)
                 .build();
+    }
+
+    public NotaCompraDto(Long id, BigDecimal montoTotal, LocalDate fecha, String nombreProveedor) {
+        this.id = id;
+        this.montoTotal = montoTotal;
+        this.fecha = fecha;
+        this.nombreProveedor = nombreProveedor;
+    }
+
+    @Override
+    public String getValor(String property) {
+        switch (property){
+            case "id":
+                return String.valueOf(getId());
+            case "montoTotal":
+                return String.valueOf(getMontoTotal());
+            case "fecha":
+                return String.valueOf(getFecha());
+            case "nombreProveedor":
+                return String.valueOf(getNombreProveedor());
+
+            default:return "";
+        }
     }
 }

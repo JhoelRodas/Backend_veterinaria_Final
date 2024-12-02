@@ -168,6 +168,7 @@ public class ResourceActionUtil {
             RECORD_ACTION_CODE,
             UPDATE_ACTION_CODE,
             DELETE_ACTION_CODE,
+            TO_EXCEL_ACTION
     };
     public static final String[] procesosActionsCode = {
             LIST_ACTION_CODE,

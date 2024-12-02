@@ -99,11 +99,11 @@ public class HistorialClinicoController {
 
     @GetMapping("/control/vacunas")
     public ResponseEntity<?> obtenerControlVacunasPorHistorial(
-            @RequestParam("idHistorial") Long idHistorial) {
+                @RequestParam("id") Long id) {
         try {
             List<ControlVacunaDto> controlVacunas =
                     controlVacunaService.obtenerControlVacunasPorHistorial(
-                            idHistorial);
+                            id);
             return ResponseEntity.ok(controlVacunas);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
