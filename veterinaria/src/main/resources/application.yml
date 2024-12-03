@@ -25,13 +25,19 @@ spring:
         implicitStrategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
     open-in-view: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/veterinariadb
-    username: veterinariadb
-    password: veterinariadb
-#    url: jdbc:postgresql://aws-0-sa-east-1.pooler.supabase.com:6543/postgres
-#    username: postgres.tnmbrhmggzcvopzwkdqw
-#    password: jairo221046194
-    driverClassName: org.postgresql.Driver
+    # url: jdbc:postgresql://localhost:5432/veterinariadb
+    # username: veterinariadb
+    # password: veterinariadb
+    #  url: jdbc:postgresql://dpg-ct3ocou8ii6s73d890n0-a.oregon-postgres.render.com:5432/postgres
+    #  username: veterinariadb_user
+    #  password: Ab2OwIps6ZTkwbzOIf5xYgktNl9cSYsZ
+    #  url: jdbc:postgresql://aws-0-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+    #  username: postgres.nhqjossadydpafnnczdh
+    #  password: 52cjOcE1gMi2vec3
+   url: jdbc:postgresql://ep-morning-sea-a5xaiq25.us-east-2.aws.neon.tech:5432/veterinaria
+   username: veterinaria_owner
+   password: 9JiFf7kxeHaS
+   driverClassName: org.postgresql.Driver
   main:
     allow-bean-definition-overriding: true
 
