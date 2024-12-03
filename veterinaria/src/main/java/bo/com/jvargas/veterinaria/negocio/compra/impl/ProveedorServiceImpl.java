@@ -3,7 +3,9 @@ package bo.com.jvargas.veterinaria.negocio.compra.impl;
 import bo.com.jvargas.veterinaria.datos.model.Producto;
 import bo.com.jvargas.veterinaria.datos.model.Proveedor;
 import bo.com.jvargas.veterinaria.datos.model.dto.ProveedorDto;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.compra.ProveedorRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.compra.ProveedorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,7 @@ import java.util.List;
 public class ProveedorServiceImpl implements ProveedorService {
 
     private final ProveedorRepository proveedorRepository;
+    private final BitacoraService bitacoraService;
 
     @Override
     public List<ProveedorDto> listar(){
@@ -28,6 +31,8 @@ public class ProveedorServiceImpl implements ProveedorService {
     @Override
     public void registrar(Proveedor proveedor){
         proveedorRepository.save(proveedor);
+        bitacoraService.info(TipoProceso.GESTIONAR_PROVEEDOR,
+                "Proveedor Registrado: {}", proveedor.getNombre());
     }
 
     @Override
@@ -42,6 +47,8 @@ public class ProveedorServiceImpl implements ProveedorService {
         proveedorActualizado.setDireccion(proveedor.getDireccion());
         proveedorActualizado.setEncargado(proveedor.getEncargado());
         proveedorRepository.save(proveedorActualizado);
+        bitacoraService.info(TipoProceso.GESTIONAR_PROVEEDOR,
+                "Proveedor Actualizado: {}", proveedor.getNombre());
     }
 
     @Override
@@ -50,6 +57,8 @@ public class ProveedorServiceImpl implements ProveedorService {
                 .orElseThrow(() -> new RuntimeException("Proveedor no encontrado"));
         proveedorBuscado.setDeleted(true);
         proveedorRepository.save(proveedorBuscado);
+        bitacoraService.info(TipoProceso.GESTIONAR_PROVEEDOR,
+                "Proveedor Eliminado: {}", proveedorBuscado.getNombre());
     }
 
 }

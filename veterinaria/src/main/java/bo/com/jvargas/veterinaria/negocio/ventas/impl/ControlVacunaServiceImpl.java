@@ -2,10 +2,12 @@ package bo.com.jvargas.veterinaria.negocio.ventas.impl;
 
 import bo.com.jvargas.veterinaria.datos.model.*;
 import bo.com.jvargas.veterinaria.datos.model.dto.ControlVacunaDto;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.inventario.ProductoRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ControlVacunaRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.HistorialClinicoRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.VacunaRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.ventas.ControlVacunaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
     private final ProductoRepository productoRepository;
     private final VacunaRepository vacunaRepository;
     private final HistorialClinicoRepository historialClinicoRepository;
+    private final BitacoraService bitacoraService;
 
     @Override
     @Transactional
@@ -34,7 +37,9 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
         HistorialClinico historial = obtenerHistorial(nuevaVacuna.getIdHistorial());
         ControlVacuna controlVacuna = ajustarControl(vacuna, historial,
                 nuevaVacuna);
-        controlVacunaRepository.save(controlVacuna);
+        ControlVacuna control = controlVacunaRepository.save(controlVacuna);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_CONTROL_VACUNA, "Control De Vacuna Registrado: {}", control.getId());
     }
 
     private Vacuna obtenerVacuna(Long idVacuna) {
@@ -90,6 +95,8 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
             controlVacuna.setProximaDosis(nuevoControl.getProximaDosis());
             controlVacuna.setDescripcion(nuevoControl.getDescripcion());
             controlVacunaRepository.save(controlVacuna);
+
+            bitacoraService.info(TipoProceso.GESTIONAR_CONTROL_VACUNA, "Control De Vacuna Actualizado: {}", controlVacuna.getId());
             return;
         }
 
@@ -119,6 +126,8 @@ public class ControlVacunaServiceImpl implements ControlVacunaService {
         controlVacuna.setProximaDosis(nuevoControl.getProximaDosis());
         controlVacuna.setDescripcion(nuevoControl.getDescripcion());
         controlVacunaRepository.save(controlVacuna);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_CONTROL_VACUNA, "Control De Vacuna Actualizado: {}", controlVacuna.getId());
     }
 
     private ControlVacuna getControlVacuna(Long id) {

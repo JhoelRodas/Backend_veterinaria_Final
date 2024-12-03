@@ -76,6 +76,8 @@ public class ProductoServiceImpl implements ProductoService {
         productoBuscado.setIdCategoria(categoria);
 
         productoRepository.save(productoBuscado);
+        bitacoraService.info(TipoProceso.GESTIONAR_PRODUCTO,
+                "Producto Actualizado correctamente : {}",productoBuscado.getNombre());
     }
 
     @Override
@@ -84,6 +86,8 @@ public class ProductoServiceImpl implements ProductoService {
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
         productoBuscado.setDeleted(true);
         productoRepository.save(productoBuscado);
+        bitacoraService.info(TipoProceso.GESTIONAR_PRODUCTO,
+                "Producto Eliminado : {}", productoBuscado.getNombre());
     }
 
 }

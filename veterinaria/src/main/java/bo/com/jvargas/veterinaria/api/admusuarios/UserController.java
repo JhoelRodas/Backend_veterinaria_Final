@@ -206,4 +206,9 @@ public class UserController {
         }
     }
 
+    @GetMapping("/veterinarios")
+    public ResponseEntity<?> listarVeterinarios() {
+        return ResponseEntity.ok(userService.listarVeterinarios());
+    }
+
 }

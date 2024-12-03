@@ -1,19 +1,24 @@
 package bo.com.jvargas.veterinaria.negocio.ventas.impl;
 
 import bo.com.jvargas.veterinaria.datos.model.Cliente;
-import bo.com.jvargas.veterinaria.datos.model.NotaCompra;
 import bo.com.jvargas.veterinaria.datos.model.Producto;
 import bo.com.jvargas.veterinaria.datos.model.Recibo;
-import bo.com.jvargas.veterinaria.datos.model.dto.*;
+import bo.com.jvargas.veterinaria.datos.model.dto.DetalleProductoDto;
+import bo.com.jvargas.veterinaria.datos.model.dto.DetalleServicioDto;
+import bo.com.jvargas.veterinaria.datos.model.dto.ReciboDetalleDto;
+import bo.com.jvargas.veterinaria.datos.model.dto.ReciboDto;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.inventario.ProductoRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ClienteRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ReciboRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.ventas.ClienteService;
 import bo.com.jvargas.veterinaria.negocio.ventas.DetalleProductoService;
 import bo.com.jvargas.veterinaria.negocio.ventas.DetalleServicioService;
 import bo.com.jvargas.veterinaria.negocio.ventas.ReciboService;
-import com.lowagie.text.*;
-import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.ErrorManager;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
@@ -40,6 +43,7 @@ public class ReciboServiceImpl implements ReciboService {
     private final ClienteService clienteService;
     private final DetalleServicioService detalleServicioService;
     private final ProductoRepository productoRepository;
+    private final BitacoraService bitacoraService;
 
     @Override
     @Transactional(readOnly = true)
@@ -113,6 +117,9 @@ public class ReciboServiceImpl implements ReciboService {
 
         if (detalleServicio != null && !detalleServicio.isEmpty())
             detalleServicioService.insertarDetallesServicios(detalleServicio);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_VENTA, "Recibo Registrado: {}", reciboGuardado.getId());
+
     }
 
     private BigDecimal calcularMontoTotal(List<DetalleProductoDto> productos,
@@ -187,6 +194,8 @@ public class ReciboServiceImpl implements ReciboService {
         // Marcar el recibo como anulado
         recibo.setDeleted(true);
         reciboRepository.save(recibo);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_VENTA, "Recibo Anulado: {}", id);
     }
 
     @Override

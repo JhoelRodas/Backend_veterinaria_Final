@@ -31,5 +31,6 @@ public interface UserService {
 
     UserDto userInfo(String username);
 
+    List<UserDto> listarVeterinarios();
 }
 

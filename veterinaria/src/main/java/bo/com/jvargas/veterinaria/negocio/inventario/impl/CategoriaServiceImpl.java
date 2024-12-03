@@ -3,8 +3,10 @@ package bo.com.jvargas.veterinaria.negocio.inventario.impl;
 import bo.com.jvargas.veterinaria.datos.model.Categoria;
 import bo.com.jvargas.veterinaria.datos.model.Estante;
 import bo.com.jvargas.veterinaria.datos.model.dto.CategoriaDto;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.inventario.CategoriaRepository;
 import bo.com.jvargas.veterinaria.datos.repository.inventario.EstanteRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.inventario.CategoriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
     private final EstanteRepository estanteRepository;
+    private final BitacoraService bitacoraService;
 
     @Override
     @Transactional(readOnly = true)
@@ -40,6 +43,9 @@ public class CategoriaServiceImpl implements CategoriaService {
 
         categoriaAGuardar.setIdEstante(estante);
         categoriaRepository.save(categoriaAGuardar);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_CATEGORIA,
+                "Categoria Registrada: {}", categoriaAGuardar.getNombre());
     }
 
     private Estante getEstante(Long id) {
@@ -58,6 +64,9 @@ public class CategoriaServiceImpl implements CategoriaService {
         Categoria categoriaActual = getCategoria(id);
         actualizarDatos(categoriaActual, nuevaCategoria);
         categoriaRepository.save(categoriaActual);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_CATEGORIA,
+                "Categoria Actualizada: {}", categoriaActual.getNombre());
     }
 
     private Categoria getCategoria(Long id) {
@@ -85,5 +94,7 @@ public class CategoriaServiceImpl implements CategoriaService {
         Categoria categoria = getCategoria(id);
         categoria.setDeleted(true);
         categoriaRepository.save(categoria);
+        bitacoraService.info(TipoProceso.GESTIONAR_CATEGORIA,
+                "Categoria Registrada: {}", categoria.getNombre());
     }
 }

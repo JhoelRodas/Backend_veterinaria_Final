@@ -5,10 +5,12 @@ import bo.com.jvargas.veterinaria.datos.model.Producto;
 import bo.com.jvargas.veterinaria.datos.model.dto.AtencionDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.ControlVacunaDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.HistorialClinicoDto;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.inventario.ProductoRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.AtencionRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ControlVacunaRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.HistorialClinicoRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.ventas.HistorialClinicoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class HistorialClinicoServiceImpl implements HistorialClinicoService {
     private final ControlVacunaRepository controlVacunaRepository;
     private final ProductoRepository productoRepository;
     private final AtencionRepository atencionRepository;
+    private final BitacoraService bitacoraService;
 
     @Override
     @Transactional(readOnly = true)
@@ -81,6 +84,8 @@ public class HistorialClinicoServiceImpl implements HistorialClinicoService {
     @Transactional
     public void registrarHistorial(HistorialClinico historialNuevo) {
         HistorialClinico historialClinico = historialClinicoRepository.save(historialNuevo);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_HISTORIAL, "Historial Clinico Registrado: {}", historialClinico.getId());
     }
 
     @Override
@@ -94,6 +99,8 @@ public class HistorialClinicoServiceImpl implements HistorialClinicoService {
 
         actualizarDatos(historialActual, historialNuevo);
         historialClinicoRepository.save(historialActual);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_HISTORIAL, "Historial Clinico Actualizado: {}", historialActual.getId());
     }
 
     private void actualizarDatos(HistorialClinico historialActual,
@@ -115,5 +122,7 @@ public class HistorialClinicoServiceImpl implements HistorialClinicoService {
         HistorialClinico historialClinico = getHistorialClinico(id);
         historialClinico.setDeleted(true);
         historialClinicoRepository.save(historialClinico);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_HISTORIAL, "Historial Clinico Eliminado: {}", id);
     }
 }

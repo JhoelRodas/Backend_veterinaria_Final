@@ -2,7 +2,9 @@ package bo.com.jvargas.veterinaria.negocio.ventas.impl;
 
 import bo.com.jvargas.veterinaria.datos.model.Servicio;
 import bo.com.jvargas.veterinaria.datos.model.dto.ServicioDto;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ServicioRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.ventas.ServicioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 public class ServicioServiceImpl implements ServicioService {
 
     private final ServicioRepository repository;
+    private final BitacoraService bitacoraService;
 
     @Override
     @Transactional(readOnly = true)
@@ -35,6 +38,8 @@ public class ServicioServiceImpl implements ServicioService {
     public Optional<ServicioDto> crearServicio(ServicioDto servicioNuevo) {
         Servicio servicio = ServicioDto.toEntity(servicioNuevo);
         Servicio servicioCreado = repository.save(servicio);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_SERVICIO, "Servicio Registrado: {}", servicioCreado.getId());
         return Optional.of(ServicioDto.toDto(servicioCreado));
     }
 
@@ -51,6 +56,7 @@ public class ServicioServiceImpl implements ServicioService {
         actualizarDatos(servicioAct, servicioNuevo);
 
         Servicio servicioActualizado = repository.save(servicioAct);
+        bitacoraService.info(TipoProceso.GESTIONAR_SERVICIO, "Servicio Actualizado: {}", servicioActualizado.getId());
         return Optional.of(ServicioDto.toDto(servicioActualizado));
     }
 
@@ -71,5 +77,8 @@ public class ServicioServiceImpl implements ServicioService {
         Servicio servicio = o.get();
         servicio.setDeleted(true);
         repository.save(servicio);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_SERVICIO, "Servicio Eliminado: {}", servicio.getId());
+
     }
 }

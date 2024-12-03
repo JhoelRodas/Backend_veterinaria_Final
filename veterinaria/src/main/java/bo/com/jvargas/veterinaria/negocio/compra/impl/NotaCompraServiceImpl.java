@@ -6,9 +6,11 @@ import bo.com.jvargas.veterinaria.datos.model.Proveedor;
 import bo.com.jvargas.veterinaria.datos.model.dto.DetalleDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.NotaCompraDetalleDto;
 import bo.com.jvargas.veterinaria.datos.model.dto.NotaCompraDto;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.compra.DetalleRepository;
 import bo.com.jvargas.veterinaria.datos.repository.compra.NotaCompraRepository;
 import bo.com.jvargas.veterinaria.datos.repository.compra.ProveedorRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.compra.DetalleService;
 import bo.com.jvargas.veterinaria.negocio.compra.NotaCompraService;
 import com.lowagie.text.Document;
@@ -41,6 +43,7 @@ public class NotaCompraServiceImpl implements NotaCompraService {
     private final ProveedorRepository proveedorRepository;
     private final DetalleRepository detalleRepository;
     private final DetalleService detalleService;
+    private final BitacoraService bitacoraService;
 
     @Transactional(readOnly = true)
     @Override
@@ -155,6 +158,8 @@ public class NotaCompraServiceImpl implements NotaCompraService {
 
         // Inserta los detalles de la nota de compra
         detalleService.insertarDetalles(detalles);
+        bitacoraService.info(TipoProceso.GESTIONAR_NOTA_COMPRA,
+                "Nota De Compra Registrada: {}", notaCompraGuardada.getId());
 
         return NotaCompraDto.toDto(notaCompraGuardada);
     }
@@ -184,6 +189,8 @@ public class NotaCompraServiceImpl implements NotaCompraService {
         actualizarDatosNotaCompra(notaCompra, notaCompraAActualizar);
 
         NotaCompra notaCompraActualizada = notaCompraRepository.save(notaCompra);
+        bitacoraService.info(TipoProceso.GESTIONAR_NOTA_COMPRA,
+                "Nota De Compra Actualizada: {}", notaCompra.getId());
 
         return Optional.of(NotaCompraDto.toDto(notaCompraActualizada));
     }
@@ -213,6 +220,8 @@ public class NotaCompraServiceImpl implements NotaCompraService {
 
         notaCompra.setDeleted(true);
         notaCompraRepository.save(notaCompra);
+        bitacoraService.info(TipoProceso.GESTIONAR_NOTA_COMPRA,
+                "Nota De Compra Eliminada: {}", notaCompra.getId());
     }
 
     @Override

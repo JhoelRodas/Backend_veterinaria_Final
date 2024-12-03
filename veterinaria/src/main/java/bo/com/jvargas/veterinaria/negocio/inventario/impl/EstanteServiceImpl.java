@@ -2,7 +2,9 @@ package bo.com.jvargas.veterinaria.negocio.inventario.impl;
 
 import bo.com.jvargas.veterinaria.datos.model.Estante;
 import bo.com.jvargas.veterinaria.datos.model.dto.EstanteDto;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.inventario.EstanteRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.inventario.EstanteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 public class EstanteServiceImpl implements EstanteService {
 
     private final EstanteRepository repository;
+    private final BitacoraService bitacoraService;
 
     @Override
     @Transactional(readOnly = true)
@@ -35,6 +38,7 @@ public class EstanteServiceImpl implements EstanteService {
     public void guardarEstante(EstanteDto estanteNuevo) {
         Estante estante = EstanteDto.toEntity(estanteNuevo);
         repository.save(estante);
+        bitacoraService.info(TipoProceso.GESTIONAR_ESTANTE, "Estante Registrado: {}", estante.getNombre());
     }
 
     @Override
@@ -43,6 +47,7 @@ public class EstanteServiceImpl implements EstanteService {
         Estante estanteAct = getEstante(id);
         actualizarDatos(estanteAct, estanteNuevo);
         repository.save(estanteAct);
+        bitacoraService.info(TipoProceso.GESTIONAR_ESTANTE, "Estante Actualizado: {}", estanteAct.getNombre());
     }
 
     private Estante getEstante(Long id) {
@@ -64,5 +69,6 @@ public class EstanteServiceImpl implements EstanteService {
         Estante estante = getEstante(id);
         estante.setDeleted(true);
         repository.save(estante);
+        bitacoraService.info(TipoProceso.GESTIONAR_ESTANTE, "Estante Eliminado: {}", estante.getNombre());
     }
 }

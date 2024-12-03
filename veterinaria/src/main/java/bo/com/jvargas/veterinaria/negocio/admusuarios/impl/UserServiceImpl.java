@@ -204,4 +204,11 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    public List<UserDto> listarVeterinarios() {
+        return authUserRepository
+                .findAllByDeletedFalseAndIdAuthRole_NameIgnoreCase(
+                        "Veterinario").stream().map(
+                                UserDto::fromAuthUser
+                ).collect(Collectors.toList());
+    }
 }

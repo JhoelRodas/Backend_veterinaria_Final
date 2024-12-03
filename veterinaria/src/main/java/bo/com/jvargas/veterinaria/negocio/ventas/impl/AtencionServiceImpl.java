@@ -5,9 +5,11 @@ import bo.com.jvargas.veterinaria.datos.model.HistorialClinico;
 import bo.com.jvargas.veterinaria.datos.model.Mascota;
 import bo.com.jvargas.veterinaria.datos.model.dto.AtencionDto;
 import bo.com.jvargas.veterinaria.datos.model.sistema.AuthUser;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.MascotaRepository;
 import bo.com.jvargas.veterinaria.datos.repository.sistema.AuthUserRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.AtencionRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.ventas.AtencionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class AtencionServiceImpl implements AtencionService {
     private final AtencionRepository atencionRepository;
     private final MascotaRepository mascotaRepository;
     private final AuthUserRepository authUserRepository;
+    private final BitacoraService bitacoraService;
 
     @Override
     @Transactional(readOnly = true)
@@ -66,7 +69,9 @@ public class AtencionServiceImpl implements AtencionService {
         atencionAGuardar.setIdHistorial(historialClinico);
         atencionAGuardar.setIdUsuario(usuario);
 
-        atencionRepository.save(atencionAGuardar);
+        Atencion atencion = atencionRepository.save(atencionAGuardar);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_ATENCION, "Atencion Registrada: {}", atencion.getId());
 
 //        Atencion atencionGuardada = atencionRepositoy.save(atencionAGuardar);
 //        Long idAtencionGuardada = atencionGuardada.gtId();
@@ -97,6 +102,8 @@ public class AtencionServiceImpl implements AtencionService {
         Atencion atencionActual = getAtencion(idAtencion);
         actualizarDatos(atencionActual, atencionNueva);
         atencionRepository.save(atencionActual);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_ATENCION, "Atencion Actualizada: {}", atencionActual.getId());
     }
 
     private void actualizarDatos(Atencion atencionActual,
@@ -111,5 +118,7 @@ public class AtencionServiceImpl implements AtencionService {
         Atencion atencion = getAtencion(id);
         atencion.setDeleted(true);
         atencionRepository.save(atencion);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_ATENCION, "Atencion Eliminada: {}", id);
     }
 }

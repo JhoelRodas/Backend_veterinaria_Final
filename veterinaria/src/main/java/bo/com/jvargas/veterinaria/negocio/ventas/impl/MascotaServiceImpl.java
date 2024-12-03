@@ -4,9 +4,12 @@ import bo.com.jvargas.veterinaria.datos.model.Cliente;
 import bo.com.jvargas.veterinaria.datos.model.HistorialClinico;
 import bo.com.jvargas.veterinaria.datos.model.Mascota;
 import bo.com.jvargas.veterinaria.datos.model.dto.MascotaDto;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ClienteRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.MascotaRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.HistorialClinicoRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
+import bo.com.jvargas.veterinaria.negocio.ventas.HistorialClinicoService;
 import bo.com.jvargas.veterinaria.negocio.ventas.MascotaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,8 @@ public class MascotaServiceImpl implements MascotaService {
     private final MascotaRepository mascotaRepository;
     private final ClienteRepository clienteRepository;
     private final HistorialClinicoRepository historialRespository;
+    private final HistorialClinicoService historialService;
+    private final BitacoraService bitacoraService;
 
     @Override
     public List<MascotaDto> lista() {
@@ -48,7 +53,9 @@ public class MascotaServiceImpl implements MascotaService {
 
         mascota2.setIdHistorial(historialClinico);
 
-        mascotaRepository.save(mascota2);
+        Mascota mascota1 = mascotaRepository.save(mascota2);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_MASCOTA, "Mascota Registrada: {}", mascota1.getId());
     }
 
 
@@ -60,8 +67,11 @@ public class MascotaServiceImpl implements MascotaService {
         mascotaBuscada.setEdad(mascota.getEdad());
         mascotaBuscada.setSexo(mascota.getSexo());
         mascotaBuscada.setColor(mascota.getColor());
-//        mascotaBuscada.setCiCliente(mascota.getCiCliente());
+        mascotaBuscada.setEspecie(mascota.getEspecie());
+        mascotaBuscada.setRaza(mascota.getRaza());
         mascotaRepository.save(mascotaBuscada);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_MASCOTA, "Mascota Actualizada: {}", mascotaBuscada.getId());
     }
 
     @Override
@@ -69,6 +79,12 @@ public class MascotaServiceImpl implements MascotaService {
         Mascota mascotaBuscada = mascotaRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
         mascotaBuscada.setDeleted(true);
+
+        //Por si acaso
+        historialService.eliminarHistorial(mascotaBuscada.getIdHistorial().getId());
+
         mascotaRepository.save(mascotaBuscada);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_MASCOTA, "Mascota Eliminada: {}", id);
     }
 }

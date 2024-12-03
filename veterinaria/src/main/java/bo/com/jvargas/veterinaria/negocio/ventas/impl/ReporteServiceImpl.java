@@ -3,7 +3,9 @@ package bo.com.jvargas.veterinaria.negocio.ventas.impl;
 import bo.com.jvargas.veterinaria.datos.model.NotaCompra;
 import bo.com.jvargas.veterinaria.datos.model.Recibo;
 import bo.com.jvargas.veterinaria.datos.model.dto.*;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ReciboRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.compra.NotaCompraService;
 import bo.com.jvargas.veterinaria.negocio.ventas.ReciboService;
 import bo.com.jvargas.veterinaria.negocio.ventas.ReporteService;
@@ -38,6 +40,7 @@ public class ReporteServiceImpl implements ReporteService {
     private final ReciboService reciboService;
     private final NotaCompraService notaCompraService;
     private final ReciboRepository reciboRepository;
+    private final BitacoraService bitacoraService;
 
     @Override
     public DocumentoDto descargarReporte(BodyReporteDto bodyReporteDto) throws OperationsException {
@@ -87,6 +90,8 @@ public class ReporteServiceImpl implements ReporteService {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
+
+            bitacoraService.info(TipoProceso.GESTIONAR_REPORTE, "Reporte Generado: {}", bodyReporteDto.getTipoReporte());
 
             return DocumentoDto.builder()
                     .nombre("Excel.xls")

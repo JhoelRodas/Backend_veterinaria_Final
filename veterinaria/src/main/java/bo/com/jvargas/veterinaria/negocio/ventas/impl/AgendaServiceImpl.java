@@ -3,8 +3,10 @@ package bo.com.jvargas.veterinaria.negocio.ventas.impl;
 import bo.com.jvargas.veterinaria.datos.model.Agenda;
 import bo.com.jvargas.veterinaria.datos.model.Cliente;
 import bo.com.jvargas.veterinaria.datos.model.dto.AgendaDto;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ClienteRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.AgendaRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.ventas.ClienteService;
 import bo.com.jvargas.veterinaria.negocio.ventas.AgendaService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class AgendaServiceImpl implements AgendaService {
     private final AgendaRepository agendaRepository;
     private final ClienteRepository clienteRepository;
     private final ClienteService clienteService;
+    private final BitacoraService bitacoraService;
 
     @Override
     @Transactional(readOnly = true)
@@ -42,7 +45,9 @@ public class AgendaServiceImpl implements AgendaService {
         Cliente cliente = getCliente(agenda);
 
         agendaAGuardar.setIdCliente(cliente);
-        agendaRepository.save(agendaAGuardar);
+        Agenda agenda1 = agendaRepository.save(agendaAGuardar);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_AGENDA, "Agenda Registrada: {}", agenda1.getId());
     }
 
     private Cliente getCliente(AgendaDto agendaNueva) {
@@ -70,6 +75,8 @@ public class AgendaServiceImpl implements AgendaService {
         Agenda agendaActual = getAgenda(id);
         actualizarDatos(agendaActual, agendaNueva);
         agendaRepository.save(agendaActual);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_AGENDA, "Agenda Actualizada: {}", agendaActual.getId());
     }
 
     private Agenda getAgenda(Long id) {
@@ -94,5 +101,7 @@ public class AgendaServiceImpl implements AgendaService {
         Agenda agendaBuscado = getAgenda(id);
         agendaBuscado.setDeleted(true);
         agendaRepository.save(agendaBuscado);
+
+        bitacoraService.info(TipoProceso.GESTIONAR_AGENDA, "Agenda Eliminada: {}", id);
     }
 }

@@ -73,6 +73,7 @@ public class ClienteServicelmpl implements ClienteService {
         clienteBuscado.setDireccion(cliente.getDireccion());
 
         clienteRepository.save(clienteBuscado);
+        bitacoraService.info(TipoProceso.GESTIONAR_CLIENTE, "Cliente actualizado: {}", cliente.getCi());
     }
 
     @Override
@@ -80,6 +81,7 @@ public class ClienteServicelmpl implements ClienteService {
         Cliente cliente = getClientePorId(id);
         cliente.setDeleted(true);
         clienteRepository.save(cliente);
+        bitacoraService.info(TipoProceso.GESTIONAR_CLIENTE, "Cliente eliminado: {}", cliente.getCi());
     }
 
     private Cliente getClientePorId(Long id) {

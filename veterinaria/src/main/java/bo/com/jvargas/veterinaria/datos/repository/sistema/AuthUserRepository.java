@@ -73,5 +73,7 @@ public interface AuthUserRepository extends JpaRepository<AuthUser, Long> {
             "set userStatus = bo.com.jvargas.veterinaria.datos.model.sistema.enums.UserStatus.ELIMINADO " +
             "where id in :idList ")
     void inhabilitarUsuarios(@Param("idList") List<Long> userToDeleteList);
+
+    List<AuthUser> findAllByDeletedFalseAndIdAuthRole_NameIgnoreCase(String rol);
 }
 

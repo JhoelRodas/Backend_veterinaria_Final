@@ -3,8 +3,10 @@ package bo.com.jvargas.veterinaria.negocio.inventario.impl;
 import bo.com.jvargas.veterinaria.datos.model.NotaSalida;
 import bo.com.jvargas.veterinaria.datos.model.Producto;
 import bo.com.jvargas.veterinaria.datos.model.dto.NotaSalidaDto;
+import bo.com.jvargas.veterinaria.datos.model.sistema.enums.TipoProceso;
 import bo.com.jvargas.veterinaria.datos.repository.inventario.NotaSalidaRepository;
 import bo.com.jvargas.veterinaria.datos.repository.inventario.ProductoRepository;
+import bo.com.jvargas.veterinaria.negocio.admusuarios.BitacoraService;
 import bo.com.jvargas.veterinaria.negocio.inventario.NotaSalidaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class NotaSalidaServiceImpl implements NotaSalidaService {
 
     private final NotaSalidaRepository repository;
     private final ProductoRepository productoRepository;
+    private final BitacoraService bitacoraService;
 
     @Override
     @Transactional(readOnly = true)
@@ -45,7 +48,9 @@ public class NotaSalidaServiceImpl implements NotaSalidaService {
         productoRepository.save(producto);
 
         notaSalida.setProducto(producto);
-        repository.save(notaSalida);
+        NotaSalida notaSalida1 = repository.save(notaSalida);
+        bitacoraService.info(TipoProceso.GESTIONAR_NOTA_SALIDA,
+                "Nota de Salida Registrado: {}", notaSalida1.getId());
     }
 
     private Producto getProducto(Long id) {
@@ -64,6 +69,8 @@ public class NotaSalidaServiceImpl implements NotaSalidaService {
         );
         actualizarDatos(notaEditada, nuevaNota);
         repository.save(notaEditada);
+        bitacoraService.info(TipoProceso.GESTIONAR_NOTA_SALIDA,
+                "Nota de Salida Actualizado: {}", notaEditada.getId());
     }
 
     private void actualizarDatos(NotaSalida notaEditar, NotaSalidaDto nuevaNota) {
@@ -120,5 +127,7 @@ public class NotaSalidaServiceImpl implements NotaSalidaService {
         productoAnt.setStock((short) (productoAnt.getStock() + notaEditada.getCantidad()));
         productoRepository.save(productoAnt);
         repository.save(notaEditada);
+        bitacoraService.info(TipoProceso.GESTIONAR_NOTA_SALIDA,
+                "Nota de Salida Registrado: {}", id);
     }
 }
