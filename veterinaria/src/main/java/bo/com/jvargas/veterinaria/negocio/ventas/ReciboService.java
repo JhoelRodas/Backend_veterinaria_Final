@@ -23,4 +23,8 @@ public interface ReciboService {
     void guardarRecibo(ReciboDetalleDto nuevoRecibo);
 
     void anularRecibo(Long id);
+
+    @Transactional(readOnly = true)
+    byte[] generarPdfVenta(Long id);
+
 }

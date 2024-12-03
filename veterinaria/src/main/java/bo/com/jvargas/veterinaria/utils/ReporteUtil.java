@@ -14,40 +14,94 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class ReporteUtil {
-    public static void crearCabeceras(XSSFWorkbook workbook, Sheet sheet, int rowIndex, String fontStyle, short fontSize, short fontIndexColor, short bgIndexColor, boolean bold, List<String> headerList, List<Integer> widthList) {
+//    public static void crearCabeceras(XSSFWorkbook workbook, Sheet sheet, int rowIndex, String fontStyle, short fontSize, short fontIndexColor, short bgIndexColor, boolean bold, List<String> headerList, List<Integer> widthList) {
+//        Row header = sheet.createRow(rowIndex);
+//        for (int i = 0; i < headerList.size(); i++) sheet.autoSizeColumn(i);
+//
+//        CellStyle headerStyle = workbook.createCellStyle();
+//        headerStyle.setFillForegroundColor(bgIndexColor);
+//        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+//
+//        XSSFFont font = crearFuente(workbook, fontStyle, fontSize, bold, fontIndexColor);
+//        headerStyle.setFont(font);
+//
+//        for (int i = 0; i < headerList.size(); i++) {
+//            Cell headerCell = header.createCell(i);
+//            headerCell.setCellValue(headerList.get(i));
+//            headerCell.setCellStyle(headerStyle);
+//        }
+//    }
+
+    public static void crearCabeceras(XSSFWorkbook workbook, Sheet sheet, int rowIndex, String fontStyle, short fontSize, boolean bold, List<String> headerList) {
         Row header = sheet.createRow(rowIndex);
-        for (int i = 0; i < headerList.size(); i++) sheet.autoSizeColumn(i);
 
+        // Estilo de las cabeceras
         CellStyle headerStyle = workbook.createCellStyle();
-        headerStyle.setFillForegroundColor(bgIndexColor);
+        headerStyle.setFillForegroundColor(IndexedColors.WHITE.getIndex()); // Fondo blanco
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderBottom(BorderStyle.THIN); // Bordes finos
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
 
-        XSSFFont font = crearFuente(workbook, fontStyle, fontSize, bold, fontIndexColor);
+        XSSFFont font = crearFuente(workbook, fontStyle, fontSize, bold, IndexedColors.BLACK.getIndex()); // Texto negro
         headerStyle.setFont(font);
 
         for (int i = 0; i < headerList.size(); i++) {
             Cell headerCell = header.createCell(i);
-            headerCell.setCellValue(headerList.get(i));
+            headerCell.setCellValue(headerList.get(i)); // Texto de la cabecera
             headerCell.setCellStyle(headerStyle);
         }
     }
 
+//    public static void crearTitulo(XSSFWorkbook workbook, Sheet sheet, String titulo, int rowIndex) {
+//        try {
+//            Row row0 = sheet.createRow(rowIndex);
+//            for (int i = 0; i < 8; i++) row0.createCell(i);
+//
+//            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 5));
+//            row0.setHeight((short) 800);
+//
+//            CellStyle tituloStyle = workbook.createCellStyle();
+//            XSSFFont fontTitulo = crearFuente(workbook, "Arial", (short)20, true, IndexedColors.GREY_50_PERCENT.getIndex());
+//            tituloStyle.setFont(fontTitulo);
+//            row0.getCell(0).setCellStyle(tituloStyle);
+//            row0.getCell(0).setCellValue(titulo);
+//
+//        } catch (Exception e) {
+//            log.error("Error", e);
+//        }
+//    }
+
     public static void crearTitulo(XSSFWorkbook workbook, Sheet sheet, String titulo, int rowIndex) {
         try {
             Row row0 = sheet.createRow(rowIndex);
-            for (int i = 0; i < 8; i++) row0.createCell(i);
 
-            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 5));
-            row0.setHeight((short) 800);
+            for (int i = 0; i < 8; i++) row0.createCell(i); // Rango para combinar celdas
 
+            sheet.addMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 5)); // Combinar celdas
+            row0.setHeight((short) 800); // Ajustar altura de la fila
+
+            // Estilo del título
             CellStyle tituloStyle = workbook.createCellStyle();
-            XSSFFont fontTitulo = crearFuente(workbook, "Arial", (short)20, true, IndexedColors.GREY_50_PERCENT.getIndex());
+            XSSFFont fontTitulo = crearFuente(workbook, "Arial", (short) 16, true, IndexedColors.BLACK.getIndex()); // Texto negro
             tituloStyle.setFont(fontTitulo);
-            row0.getCell(0).setCellStyle(tituloStyle);
-            row0.getCell(0).setCellValue(titulo);
+            tituloStyle.setAlignment(HorizontalAlignment.CENTER); // Centrar texto
+            tituloStyle.setVerticalAlignment(VerticalAlignment.CENTER); // Centrar verticalmente
+
+            Cell tituloCell = row0.getCell(0);
+            tituloCell.setCellStyle(tituloStyle);
+            tituloCell.setCellValue(titulo); // Texto del título
 
         } catch (Exception e) {
-            log.error("Error", e);
+            log.error("Error al crear el título", e);
+        }
+    }
+
+
+    public static void ajustarColumnas(Sheet sheet, int totalColumnas) {
+        for (int i = 0; i < totalColumnas; i++) {
+            sheet.autoSizeColumn(i);
         }
     }
 

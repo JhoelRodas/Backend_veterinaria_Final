@@ -1,12 +1,10 @@
 package bo.com.jvargas.veterinaria.negocio.ventas.impl;
 
 import bo.com.jvargas.veterinaria.datos.model.Cliente;
+import bo.com.jvargas.veterinaria.datos.model.NotaCompra;
 import bo.com.jvargas.veterinaria.datos.model.Producto;
 import bo.com.jvargas.veterinaria.datos.model.Recibo;
-import bo.com.jvargas.veterinaria.datos.model.dto.DetalleProductoDto;
-import bo.com.jvargas.veterinaria.datos.model.dto.DetalleServicioDto;
-import bo.com.jvargas.veterinaria.datos.model.dto.ReciboDetalleDto;
-import bo.com.jvargas.veterinaria.datos.model.dto.ReciboDto;
+import bo.com.jvargas.veterinaria.datos.model.dto.*;
 import bo.com.jvargas.veterinaria.datos.repository.inventario.ProductoRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ClienteRepository;
 import bo.com.jvargas.veterinaria.datos.repository.ventas.ReciboRepository;
@@ -14,17 +12,24 @@ import bo.com.jvargas.veterinaria.negocio.ventas.ClienteService;
 import bo.com.jvargas.veterinaria.negocio.ventas.DetalleProductoService;
 import bo.com.jvargas.veterinaria.negocio.ventas.DetalleServicioService;
 import bo.com.jvargas.veterinaria.negocio.ventas.ReciboService;
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.ErrorManager;
 import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @RequiredArgsConstructor
 @Service("ReciboService")
 public class ReciboServiceImpl implements ReciboService {
@@ -182,6 +187,93 @@ public class ReciboServiceImpl implements ReciboService {
         // Marcar el recibo como anulado
         recibo.setDeleted(true);
         reciboRepository.save(recibo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] generarPdfVenta(Long id) {
+        // Obtener el recibo y detalles
+        Recibo recibo = getRecibo(id);
+        List<DetalleProductoDto> listaDeDetallesProductos = detalleService.listarDetalles(recibo.getId());
+        List<DetalleServicioDto> listaDeDetallesServicios = detalleServicioService.listar(recibo.getId());
+
+        // Crear PDF
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Document document = new Document();
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+
+            // Agregar datos principales del recibo
+            document.add(new Paragraph("Recibo de Venta"));
+            document.add(new Paragraph("ID de Recibo: " + recibo.getId()));
+            document.add(new Paragraph("Fecha: " + recibo.getFecha()));
+            document.add(new Paragraph("Cliente: " + (recibo.getIdCliente() != null ? recibo.getIdCliente().getNombre() : "N/A")));
+            document.add(new Paragraph("CI: " + (recibo.getIdCliente() != null && recibo.getIdCliente().getCi() != null ? recibo.getIdCliente().getCi() : "N/A")));
+            document.add(new Paragraph("Monto Total: " + recibo.getMontoTotal()));
+            document.add(new Paragraph(" ")); // Espacio entre datos principales y la tabla
+
+            // Tabla para productos
+            if (!listaDeDetallesProductos.isEmpty()) {
+                document.add(new Paragraph("Detalles de Productos"));
+                PdfPTable tableProductos = new PdfPTable(4); // 4 columnas: ID Producto, Nombre, Cantidad, Monto
+                tableProductos.setWidthPercentage(100);
+
+                // Encabezados de la tabla de productos
+                tableProductos.addCell("ID Producto");
+                tableProductos.addCell("Nombre");
+                tableProductos.addCell("Cantidad");
+                tableProductos.addCell("Monto");
+
+                for (DetalleProductoDto detalle : listaDeDetallesProductos) {
+                    tableProductos.addCell(String.valueOf(detalle.getIdProducto()));
+                    tableProductos.addCell(detalle.getNombreProducto() != null ? detalle.getNombreProducto() : "N/A");
+                    tableProductos.addCell(String.valueOf(detalle.getCant()));
+                    tableProductos.addCell(String.valueOf(detalle.getMonto()));
+                }
+
+                document.add(tableProductos);
+            }
+
+            document.add(new Paragraph(" ")); // Espacio entre tablas
+
+            // Tabla para servicios
+            if (!listaDeDetallesServicios.isEmpty()) {
+                document.add(new Paragraph("Detalles de Servicios"));
+                PdfPTable tableServicios = new PdfPTable(4); // 4 columnas: ID Servicio, Nombre, Cantidad, Monto
+                tableServicios.setWidthPercentage(100);
+
+                // Encabezados de la tabla de servicios
+                tableServicios.addCell("ID Servicio");
+                tableServicios.addCell("Nombre");
+                tableServicios.addCell("Cantidad");
+                tableServicios.addCell("Monto");
+
+                for (DetalleServicioDto detalle : listaDeDetallesServicios) {
+                    tableServicios.addCell(String.valueOf(detalle.getIdServicio()));
+                    tableServicios.addCell(detalle.getNombreServicio() != null ? detalle.getNombreServicio() : "N/A");
+                    tableServicios.addCell(String.valueOf(detalle.getCant()));
+                    tableServicios.addCell(String.valueOf(detalle.getMonto()));
+                }
+
+                document.add(tableServicios);
+            }
+
+            // Cerrar el documento
+            document.close();
+        } catch (DocumentException e) {
+            log.error("Error al generar PDF para el recibo con ID: " + id, e);
+            return null;
+        }
+        return out.toByteArray();
+
+    }
+
+    private Recibo getRecibo(Long id) {
+        return reciboRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No existe el recibo con el ID " + id
+                ));
     }
 
     private void devolverStock(DetalleProductoDto detalle) {

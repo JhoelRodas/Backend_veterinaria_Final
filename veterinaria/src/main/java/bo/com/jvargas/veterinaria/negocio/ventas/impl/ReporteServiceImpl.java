@@ -48,30 +48,42 @@ public class ReporteServiceImpl implements ReporteService {
             Sheet sheet = workbook.createSheet(bodyReporteDto.getTipoReporte());
 
             int rowIndex = 0;
+//            ReporteUtil.crearTitulo(workbook, sheet, bodyReporteDto.getTipoReporte(), rowIndex);
+//            rowIndex ++;
+//
+//            CellStyle tituloStyle = workbook.createCellStyle();
+//            XSSFFont fontTitulo = ReporteUtil.crearFuente(workbook, "Arial", (short)15, true, IndexedColors.BLACK.getIndex());
+//            tituloStyle.setFont(fontTitulo);
+//
+//            CellStyle valorStyle = workbook.createCellStyle();
+//            XSSFFont fontValor = ReporteUtil.crearFuente(workbook, "Arial", (short)12, false, IndexedColors.BLACK.getIndex());
+//            valorStyle.setFont(fontValor);
+//
+//            rowIndex ++;
+//
+//            List<String> headers = ReporteUtil.buildDataHeaders(bodyReporteDto.getHeaders());
+//
+//            ReporteUtil.crearCabeceras(workbook, sheet, rowIndex, "Arial", (short)10, IndexedColors.WHITE.getIndex(), IndexedColors.GREY_50_PERCENT.getIndex(), true, headers, widthList);
+//
+//            XSSFFont cellFont = ReporteUtil.crearFuente(workbook, "Arial", (short)10, false, IndexedColors.BLACK.getIndex());
+//            CellStyle cellStyle = workbook.createCellStyle();
+//            cellStyle.setFont(cellFont);
+//            cellStyle.setLocked(true);
+
+            // Crear título
             ReporteUtil.crearTitulo(workbook, sheet, bodyReporteDto.getTipoReporte(), rowIndex);
-            rowIndex ++;
+            rowIndex++;
 
-            CellStyle tituloStyle = workbook.createCellStyle();
-            XSSFFont fontTitulo = ReporteUtil.crearFuente(workbook, "Arial", (short)15, true, IndexedColors.BLACK.getIndex());
-            tituloStyle.setFont(fontTitulo);
-
-            CellStyle valorStyle = workbook.createCellStyle();
-            XSSFFont fontValor = ReporteUtil.crearFuente(workbook, "Arial", (short)12, false, IndexedColors.BLACK.getIndex());
-            valorStyle.setFont(fontValor);
-
-            rowIndex ++;
-
+            // Crear cabeceras
             List<String> headers = ReporteUtil.buildDataHeaders(bodyReporteDto.getHeaders());
+            ReporteUtil.crearCabeceras(workbook, sheet, rowIndex, "Arial", (short) 12, true, headers);
+            rowIndex++;
 
-            ReporteUtil.crearCabeceras(workbook, sheet, rowIndex, "Arial", (short)10, IndexedColors.WHITE.getIndex(), IndexedColors.GREY_50_PERCENT.getIndex(), true, headers, widthList);
+            // Insertar datos según el tipo de reporte
+            int totalColumnas = insertarData(workbook, sheet, bodyReporteDto.getHeaders(), rowIndex, filters, bodyReporteDto.getTipoReporte());
 
-            XSSFFont cellFont = ReporteUtil.crearFuente(workbook, "Arial", (short)10, false, IndexedColors.BLACK.getIndex());
-            CellStyle cellStyle = workbook.createCellStyle();
-            cellStyle.setFont(cellFont);
-            cellStyle.setLocked(true);
-
-            rowIndex ++;
-            insertarData(workbook,sheet,bodyReporteDto.getHeaders(),rowIndex,filters, bodyReporteDto.getTipoReporte());
+            // Ajustar automáticamente las columnas
+            ReporteUtil.ajustarColumnas(sheet, totalColumnas);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
@@ -86,22 +98,24 @@ public class ReporteServiceImpl implements ReporteService {
         }
     }
 
-    private void insertarData(XSSFWorkbook workbook, Sheet sheet, List<CabeceraReporteDto> cabeceras, int rowIndex, FiltroReporteDto filters, String tipoReporte) {
+    private int insertarData(XSSFWorkbook workbook, Sheet sheet, List<CabeceraReporteDto> cabeceras, int rowIndex, FiltroReporteDto filters, String tipoReporte) {
         switch (tipoReporte){
             case "Ventas":
-                insertarDataReporteVentas(sheet,cabeceras,filters,rowIndex);
-                break;
+                return insertarDataReporteVentas(sheet,cabeceras,filters,rowIndex);
+
             case "Compras":
-                insertarDataReporteCompras(sheet,cabeceras,filters,rowIndex);
-                break;
+                return insertarDataReporteCompras(sheet,cabeceras,filters,rowIndex);
+
 
             default:
                 throw new OperationException(String.format("Formato de reporte: '%s' no válido.", tipoReporte));
         }
 
+
+
     }
 
-    private void insertarDataReporteVentas(Sheet sheet, List<CabeceraReporteDto> cabeceras, FiltroReporteDto filters, int rowIndex){
+    private int insertarDataReporteVentas(Sheet sheet, List<CabeceraReporteDto> cabeceras, FiltroReporteDto filters, int rowIndex){
         // Extraer los filtros del objeto FiltroReporteDto
         LocalDate inicio = filters.getInicio();
         LocalDate fin = filters.getFin();
@@ -113,9 +127,11 @@ public class ReporteServiceImpl implements ReporteService {
                 inicio,fin,montoMayor,montoMenor,metodoPago);
 
         ReporteUtil.setDataCellReporte(sheet,dataPage,cabeceras,rowIndex);
+        return cabeceras.size();
+
     }
 
-    private void insertarDataReporteCompras(Sheet sheet, List<CabeceraReporteDto> cabeceras, FiltroReporteDto filters, int rowIndex){
+    private int insertarDataReporteCompras(Sheet sheet, List<CabeceraReporteDto> cabeceras, FiltroReporteDto filters, int rowIndex){
         LocalDate inicio = filters.getInicio();
         LocalDate fin = filters.getFin();
         BigDecimal montoMayor = filters.getMontoMayor();
@@ -126,6 +142,8 @@ public class ReporteServiceImpl implements ReporteService {
                 inicio,fin,montoMayor,montoMenor,nombreProveedor);
 
         ReporteUtil.setDataCellReporte(sheet,dataPage,cabeceras,rowIndex);
+
+        return cabeceras.size();
     }
 
 
